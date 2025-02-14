@@ -1,0 +1,28 @@
+prompts:
+  generate: >-
+    I want to create a dataset of 10 samples of single, syntactically correct Python functions that
+    are intentionally poorly designed and includes common code smells that require refactoring.
+
+    Can you generate a set specs that I can use to generate such a dataset?
+
+    For each spec, specify:
+
+    1. purpose: The real world purpose of the function.
+    2. name: The name of the function.
+    3. signature: The signature of the function. Make sure to put this in quotes in the YAML.
+    4. length: How long the function should be? Specify this between 500-2000 lines.
+    5. code_smells: What type of issues the code should have that require refactoring, such as:
+      - Multiple concerns (the function does more than one thing)
+      - Magic numbers (unexplained numeric literals)
+      - Duplicated code
+      - Unclear variable names
+    6. language: What language to write the code in. For now, always use "python" for this.
+
+    Do not generate the actual code. Just write it up as a spec that I can give to an LLM to
+    generate the actual code.
+
+    I want a diverse set of code that represents realistic scenarios. Please your response contains
+    a variety of real-world tasks. Brainstorm at least twice the number of tasks you'll need first
+    and output those as a list. Then, select the most diverse and interesting tasks from that list.
+
+    Return the final list of specs as an array in YAML format wrapped within a ```yaml code block.

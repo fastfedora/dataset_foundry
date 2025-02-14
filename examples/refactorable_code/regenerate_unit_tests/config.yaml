@@ -1,0 +1,31 @@
+prompts:
+  regenerate_unit_tests: >-
+    The unit tests for this Python code are failing. Can you re-write them so they do not fail?
+
+    The current unit tests are:
+
+    <unit_tests>
+    {unit_tests}
+    </unit_tests>
+
+    When running the unit tests, the following errors occur:
+
+    <stdout>
+    {test_stdout}
+    </stdout>
+
+    <stderr>
+    {test_stderr}
+    </stderr>
+
+    Here is the code for the function being tested:
+
+    <code>
+    {code}
+    </code>
+
+    First identify the tests that are failing. Then think through why they are failing and how to
+    fix the tests. Finally, update the failing tests so they pass.
+
+    Do not rewrite the original code, nor include it in your response. Only fix the unit tests so
+    they pass with the given code. Format your response within a ```python code block.

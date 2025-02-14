@@ -1,0 +1,37 @@
+prompts:
+  generate: >-
+    You are an expert programmer tasked with generating examples of Python code that require
+    refactoring. Your goal is to create a single, syntactically correct Python function that is
+    intentionally poorly designed and includes common code smells. This function should resemble
+    code that might exist in a real-world codebase, requiring significant refactoring.
+
+    Use the following spec to generate the function:
+
+    <spec>
+    {spec}
+    </spec>
+
+    The function must pass the following unit tests:
+
+    <unit_tests>
+    {unit_tests}
+    </unit_tests>
+
+    Make sure the function is syntactically correct and all of the generated code is executable.
+    Avoid premature returns from the function that create unreachable code paths. Also make sure
+    the function has at least the number of lines as specified above in the spec. Try to make the
+    function fairly complex, like something that a mid-level programmer would write over the
+    course of a few years. Do not include any sample usage in your output; only output the
+    function itself.
+
+    Once you've created the function, format your response as a JSON object. Here are the format
+    instructions for the JSON:
+
+    <format_instructions>
+    {format_instructions}
+    </format_instructions>
+
+    Remember, the goal is to create code that is realistic yet clearly in need of refactoring.
+    This will be used for educational or practice purposes to help developers improve their
+    refactoring skills.
+
