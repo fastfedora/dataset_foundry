@@ -64,6 +64,31 @@ dataset-foundry examples/refactorable_code/generate_spec/pipeline.py dataset1
 
 Use `dataset-foundry --help` to see available arguments.
 
+### Running Examples
+
+To generate a set of specs for a dataset named `o3v5`, you would use:
+
+```bash
+dataset-foundry examples/refactorable_code/generate_spec/pipeline.py samples --num-samples=2
+```
+
+To generate a set of functions and unit testsfrom the specs, you would use:
+
+```bash
+dataset-foundry examples/refactorable_code/generate_all_from_spec/pipeline.py samples
+```
+
+To run the unit tests for the generated functions, you would use:
+
+```bash
+dataset-foundry examples/refactorable_code/regenerate_unit_tests/pipeline.py samples
+```
+
+If some of the unit tests fail, you can regenerate them by running:
+
+```bash
+dataset-foundry examples/refactorable_code/regenerate_unit_tests/pipeline.py samples
+```
 
 ## Variable Substitutions
 
