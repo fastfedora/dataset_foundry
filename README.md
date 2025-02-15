@@ -64,6 +64,30 @@ dataset-foundry examples/refactorable_code/generate_spec/pipeline.py dataset1
 
 Use `dataset-foundry --help` to see available arguments.
 
+
+## Variable Substitutions
+
+Variable substitutions allows you to use variables in your prompts and in certain parameters passed
+into pipeline actions.
+
+Prompt templates and certain parameters are parsed as f-strings, with the following enhancements:
+
+- Dotted references are supported and resolve both dictionary keys or object attributes. For
+  instance, `{spec.name}` will return the value of `spec['name']` if `spec` is a dictionary, or
+  the value of `spec.name` if `spec` is an object.
+- Formatters can be specified after a colon. For example, `{spec:yaml}` will return the `spec`
+  object formatted as a YAML string. Supported formatters include: `yaml`, `json`, `upper`, `lower`.
+
+For instance, if an item is being processed with an id of `123` and a `spec` dictionary with a
+`name` key of `my_function`, the following will save the `code` property of the item as a file named
+`func_123_my_function.py`:
+
+```python
+   ...
+   save_item(contents=Key("code"), filename="func_{id}_{spec.name}.py"),
+   ...
+```
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

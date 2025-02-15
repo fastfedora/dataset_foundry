@@ -5,6 +5,7 @@ from ...core.dataset_item import DatasetItem
 from ...core.key import Key
 from ...utils.params.resolve_item_value import resolve_item_value
 from ...utils.save_messages import save_messages
+from ...utils.format.format_template import format_template
 
 def save_item_chat(
         dir: Union[Callable,Key,str] = Key("log_dir"),
@@ -16,7 +17,7 @@ def save_item_chat(
 
         if isinstance(resolved_filename, str):
             format_data = {**item.data, 'id': item.id}
-            resolved_filename = resolved_filename.format(**format_data)
+            resolved_filename = format_template(resolved_filename, format_data)
 
         log_file = resolved_dir / resolved_filename
         save_messages(log_file, item.data["messages"], item.data["response"].content)

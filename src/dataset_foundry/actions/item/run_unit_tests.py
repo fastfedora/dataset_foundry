@@ -5,6 +5,7 @@ from ...core.dataset_item import DatasetItem
 from ...core.key import Key
 from ...utils.params.resolve_item_value import resolve_item_value
 from ...utils.unit_tests.run_python_unit_tests import run_python_unit_tests
+from ...utils.format.format_template import format_template
 
 def run_unit_tests(
         filename: Union[Callable,Key,str],
@@ -18,7 +19,7 @@ def run_unit_tests(
 
         if isinstance(resolved_filename, str):
             format_data = {**item.data, 'id': item.id}
-            resolved_filename = resolved_filename.format(**format_data)
+            resolved_filename = format_template(resolved_filename, format_data)
 
         result = run_python_unit_tests(resolved_dir / resolved_filename)
 

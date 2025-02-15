@@ -6,10 +6,11 @@ from ...core.context import Context
 from ...core.dataset_item import DatasetItem
 from ...core.key import Key
 from ...utils.params.resolve_item_value import resolve_item_value
+from ...utils.format.preprocess_template import preprocess_template
 
 def build_prompt(user: str, variables: dict):
-    prompt_template = ChatPromptTemplate.from_messages([("user", user)])
-
+    user, variables = preprocess_template(user, variables)
+    prompt_template = ChatPromptTemplate.from_template(user)
     return prompt_template.partial(**variables)
 
 def generate_item(

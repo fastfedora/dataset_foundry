@@ -6,6 +6,7 @@ from ...core.context import Context
 from ...core.dataset_item import DatasetItem
 from ...core.key import Key
 from ...utils.params.resolve_item_value import resolve_item_value
+from ...utils.format.format_template import format_template
 
 def save_item(
         filename: Union[Callable,Key,str],
@@ -22,7 +23,7 @@ def save_item(
 
         if isinstance(resolved_filename, str):
             format_data = {**item.data, 'id': item.id}
-            resolved_filename = resolved_filename.format(**format_data)
+            resolved_filename = format_template(resolved_filename, format_data)
 
         if resolved_format == 'json':
             resolved_contents = json.dumps(resolved_contents, indent=2)
