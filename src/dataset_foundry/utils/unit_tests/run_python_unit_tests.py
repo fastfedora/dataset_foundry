@@ -1,12 +1,31 @@
 import logging
-from pathlib import Path
-import subprocess
-import sys
 import os
+from pathlib import Path
+import re
+from subprocess import CompletedProcess, CalledProcessError, run
+import sys
+from typing import Union
+
+from dataset_foundry.types.unit_test_result import UnitTestResult
 
 logger = logging.getLogger(__name__)
 
-def run_python_unit_tests(test_path: str):
+def parse_pytest_results(result: Union[CompletedProcess, CalledProcessError]) -> UnitTestResult:
+    passed_match = re.search(r'(\d+)\s*passed', result.stdout)
+    failed_match = re.search(r'(\d+)\s*failed', result.stdout)
+    num_passed = int(passed_match.group(1)) if passed_match else 0
+    num_failed = int(failed_match.group(1)) if failed_match else 0
+
+    return UnitTestResult(
+        command=result.args or result.cmd,
+        num_passed=num_passed,
+        num_failed=num_failed,
+        returncode=result.returncode,
+        stdout=result.stdout,
+        stderr=result.stderr
+    )
+
+def run_python_unit_tests(test_path: Path) -> UnitTestResult:
     """
     Run the unit tests using pytest.
 
@@ -24,18 +43,18 @@ def run_python_unit_tests(test_path: str):
             "Please install it with: pip install pytest"
         )
 
+    logger.debug(f"Running unit tests for {test_path.name}")
+
     try:
-        result = subprocess.run(
+        result = parse_pytest_results(run(
             [str(pytest_path), test_path, "-v"],
             check=True,
             capture_output=True,
             text=True
-        )
+        ))
+    except CalledProcessError as e:
+        result = parse_pytest_results(e)
 
-        # TODO: Standardize the return value of this function. [fastfedora 14.Feb.25]
-        return result
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Tests failed with exit code {e.returncode}")
+    logger.debug(f"Unit test results: {result}")
 
-        # TODO: Standardize the return value of this function. [fastfedora 14.Feb.25]
-        return e
+    return result
