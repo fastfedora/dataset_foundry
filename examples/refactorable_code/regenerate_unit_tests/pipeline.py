@@ -27,10 +27,10 @@ pipeline = Pipeline(
         ),
     ],
     actions=[
-        run_unit_tests(filename="func_{id}_{function_name}_test.py"),
-        log_item(properties=['test_result']),
-        if_item("not item.data['test_result'].success", [
-            log_item(properties=['test_result.stdout']),
+        run_unit_tests(filename="func_{id}_{function_name}_test.py", property="original_result"),
+        log_item(properties=['original_result']),
+        if_item("not item.data['original_result'].success", [
+            log_item(properties=['original_result.stdout']),
             generate_item(prompt=Key("prompts.regenerate_unit_tests")),
             save_item_chat(filename="chat_{id}_regenerate_unit_tests.yaml"),
             parse_item(code_block="python", output_key="unit_tests"),
@@ -38,10 +38,20 @@ pipeline = Pipeline(
                 contents=(lambda item: item.data["unit_tests"]),
                 filename="func_{id}_{function_name}_test_updated.py",
             ),
-            run_unit_tests(filename="func_{id}_{function_name}_test_updated.py"),
-            log_item(properties=['test_result']),
-            if_item("not item.data['test_result'].success", [
-                log_item(properties=['test_result.stdout']),
+            run_unit_tests(
+                filename="func_{id}_{function_name}_test_updated.py",
+                property="updated_result"
+            ),
+            log_item(properties=['updated_result']),
+            if_item("not item.data['updated_result'].success", [
+                log_item(properties=['updated_result.stdout']),
+            ]),
+            if_item("item.data['updated_result'].num_passed > item.data['original_result'].num_passed", [
+                save_item(
+                    contents=(lambda item: item.data["unit_tests"]),
+                    filename="func_{id}_{function_name}_test.py"
+                ),
+                # TODO: Delete `_updated.py` file [fastfedora 15.Feb.25]
             ]),
         ])
     ]

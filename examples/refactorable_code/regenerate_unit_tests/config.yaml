@@ -11,11 +11,11 @@ prompts:
     When running the unit tests, the following errors occur:
 
     <stdout>
-    {test_result.stdout}
+    {original_result.stdout}
     </stdout>
 
     <stderr>
-    {test_result.stderr}
+    {original_result.stderr}
     </stderr>
 
     Here is the code for the function being tested:
