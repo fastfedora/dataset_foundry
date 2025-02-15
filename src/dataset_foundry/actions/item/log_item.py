@@ -4,6 +4,7 @@ import logging
 
 from ...core.context import Context
 from ...core.dataset_item import DatasetItem
+from ...utils.get import get
 
 logger = logging.getLogger(__name__)
 
@@ -13,13 +14,15 @@ def log_item(
     async def log_item_action(item: DatasetItem, _context: Context):
         if properties:
             if len(properties) == 1:
-                logger.info(f"[{item.id}] {properties[0]}: {item.data[properties[0]]}")
+                message = f"[{item.id}] {properties[0]}: {get(item.data, properties[0])}"
             else:
                 filtered_data = {
-                    key: value for key, value in item.data.items() if key in properties
+                    key: get(item.data, key.split('.')) for key in properties
                 }
-                logger.info(f"[{item.id}] {pformat(filtered_data)}")
+                message = f"[{item.id}] {pformat(filtered_data)}"
         else:
-            logger.info(f"[{item.id}] {pformat(item.data)}")
+            message = f"[{item.id}] {pformat(item.data)}"
+
+        logger.info(message)
 
     return log_item_action
