@@ -11,7 +11,7 @@ pipeline = Pipeline(
       generate_dataset(prompt=Key("prompts.generate")),
     ],
     actions=[
-      parse_item(code_block="yaml", output_key="output"),
-      save_item(contents=(lambda item: item.data["output"]), filename="specs.yaml")
+      parse_item(code_block="yaml", output_key="specs"),
+      save_item(contents=Key("specs"), filename="specs.yaml")
     ]
 )
