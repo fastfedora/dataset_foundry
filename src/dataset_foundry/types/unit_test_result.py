@@ -15,7 +15,7 @@ class UnitTestResult(BaseModel):
 
     @property
     def success(self) -> bool:
-        return self.num_failed == 0
+        return self.returncode == 0 and self.num_passed > 0 and self.num_failed == 0
 
     def __str__(self):
         status = "SUCCESS" if self.success else "FAILED"
@@ -24,7 +24,12 @@ class UnitTestResult(BaseModel):
         stderr = f", stderr: {self.stderr}" if self.stderr else ""
         error = f"(code: {self.returncode}{stderr})" if not self.success else ""
 
+        if self.total_tests > 0:
+            message = f"{self.total_tests} tests - {passed} {failed} {error}"
+        else:
+            message = "no tests found"
+
         if passed and failed:
             passed += ","
 
-        return f"{status}: {self.total_tests} tests - {passed} {failed} {error}"
+        return f"{status}: {message} {error}"
