@@ -31,6 +31,10 @@ def load_dataset(
 
         logger.debug(f"Loaded {len(dataset_items)} rows from {path}")
 
+        if context['num_samples'] and len(dataset_items) > context['num_samples']:
+            logger.debug(f"Limiting dataset to {context['num_samples']} samples")
+            dataset_items = dataset_items[:context['num_samples']]
+
         for i, data in enumerate(dataset_items):
             item = DatasetItem(
                 id=f"{i+1:03d}",

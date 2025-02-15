@@ -40,6 +40,10 @@ def generate_dataset(
             contents = [response.content]
             resolved_output_key = resolved_output_key or "output"
 
+        if context['num_samples'] and len(contents) > context['num_samples']:
+            logger.debug(f"Limiting dataset to {context['num_samples']} samples")
+            contents = contents[:context['num_samples']]
+
         for i, content in enumerate(contents):
             item = DatasetItem(
                 f"{i+1:03d}",

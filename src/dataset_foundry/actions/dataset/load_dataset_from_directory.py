@@ -60,6 +60,10 @@ def load_dataset_from_directory(
 
         logger.debug(f"Loaded {len(dataset_items)} rows from {include_path}")
 
+        if context['num_samples'] and len(dataset_items) > context['num_samples']:
+            logger.debug(f"Limiting dataset to {context['num_samples']} samples")
+            dataset_items = dataset_items[:context['num_samples']]
+
         for i, item_info in enumerate(dataset_items):
             data = item_info['data']
             metadata = item_info['metadata']
