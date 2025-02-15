@@ -28,9 +28,9 @@ pipeline = Pipeline(
     ],
     actions=[
         run_unit_tests(filename="func_{id}_{function_name}_test.py"),
-        log_item(properties=['test_returncode']),
-        if_item("item.data['test_returncode'] > 0", [
-            log_item(properties=['test_stdout']),
+        log_item(properties=['test_result']),
+        if_item("not item.data['test_result'].success", [
+            log_item(properties=['test_result.stdout']),
             generate_item(prompt=Key("prompts.regenerate_unit_tests")),
             save_item_chat(filename="chat_{id}_regenerate_unit_tests.yaml"),
             parse_item(code_block="python", output_key="unit_tests"),
@@ -39,9 +39,9 @@ pipeline = Pipeline(
                 filename="func_{id}_{function_name}_test_updated.py",
             ),
             run_unit_tests(filename="func_{id}_{function_name}_test_updated.py"),
-            log_item(properties=['test_returncode']),
-            if_item("item.data['test_returncode'] > 0", [
-                log_item(properties=['test_stdout']),
+            log_item(properties=['test_result']),
+            if_item("not item.data['test_result'].success", [
+                log_item(properties=['test_result.stdout']),
             ]),
         ])
     ]
