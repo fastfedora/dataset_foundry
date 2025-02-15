@@ -1,7 +1,7 @@
 prompts:
-  generate: >-
     I want to create a dataset of 10 samples of single, syntactically correct Python functions that
     are intentionally poorly designed and includes common code smells that require refactoring.
+  generate: |-
 
     Can you generate a set specs that I can use to generate such a dataset?
 

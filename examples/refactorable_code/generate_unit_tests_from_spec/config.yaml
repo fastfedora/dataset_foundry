@@ -1,5 +1,5 @@
 prompts:
-  generate: >-
+  generate: |-
     I need examples of Python code that require refactoring for a project, plus unit tests that
     can verify the functionality of the code before and after refactoring.
 

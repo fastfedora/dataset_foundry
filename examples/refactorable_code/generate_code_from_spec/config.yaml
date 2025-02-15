@@ -1,5 +1,5 @@
 prompts:
-  generate: >-
+  generate: |-
     You are an expert programmer tasked with generating examples of Python code that require
     refactoring. Your goal is to create a single, syntactically correct Python function that is
     intentionally poorly designed and includes common code smells. This function should resemble

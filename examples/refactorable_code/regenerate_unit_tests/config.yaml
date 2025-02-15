@@ -1,5 +1,5 @@
 prompts:
-  regenerate_unit_tests: >-
+  regenerate_unit_tests: |-
     The unit tests for this Python code are failing. Can you re-write them so they do not fail?
 
     The current unit tests are:
