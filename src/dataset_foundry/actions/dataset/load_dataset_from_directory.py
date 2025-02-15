@@ -64,6 +64,12 @@ def load_dataset_from_directory(
             data = item_info['data']
             metadata = item_info['metadata']
 
+            # Merge metadata except for 'id' into data
+            if isinstance(data, dict):
+                data.update({
+                    key: value for key, value in metadata.items() if key != 'id' and key not in data
+                })
+
             if isinstance(data, dict) and 'id' in data:
                 id = data['id']
                 del data['id']
