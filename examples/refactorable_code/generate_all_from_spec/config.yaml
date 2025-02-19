@@ -12,7 +12,10 @@ prompts:
     Generate a Python function that adheres to the provided specification. The function must be
     functionally correct but intentionally include the listed code smells and design issues. Ensure
     the code meets the specified length requirement and reflects realistic, complex, and
-    refactorable real-world scenarios.
+    refactorable real-world scenarios. Only use built-in Python libraries; do not use any libraries
+    that require being installed for the main function to execute. Also, do not add any comments
+    mentioning the code smells; comments unrelated to the code smells are allowed. Write the code as
+    a junior programmer would with the type of comments that a junior programmer would use.
 
     2. **Unit Tests:**
     Create a comprehensive suite of unit tests for the generated function using a testing framework
@@ -25,7 +28,7 @@ prompts:
 
     Please output the function code in between <function> XML tags and the unit tests in between
     separate <unit_tests> XML tags. Do not put the XML tags within a code block or otherwise use
-    code block formatting.
+    code block formatting, and do not enclose the code in ```python tags.
 
     Here is an example YAML spec:
 
