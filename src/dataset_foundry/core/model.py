@@ -2,6 +2,8 @@ from langchain.chat_models.base import BaseChatModel
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 
+MAX_TOKENS = 8096
+
 class Model:
     """
     A model that can be used to generate text.
@@ -22,6 +24,7 @@ class Model:
     def create(model: str, temperature: float) -> BaseChatModel:
         """Create a chat model instance based on the provider:model string."""
         provider, model_name = Model.parse_model_string(model)
+
         if provider == "openai":
             return ChatOpenAI(
                 model=model_name,
@@ -30,7 +33,8 @@ class Model:
         elif provider == "anthropic":
             return ChatAnthropic(
                 model=model_name,
-                temperature=temperature
+                temperature=temperature,
+                max_tokens=MAX_TOKENS
             )
         else:
             raise ValueError(f"Unsupported model provider: {provider}")
