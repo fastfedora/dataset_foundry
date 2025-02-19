@@ -17,6 +17,10 @@ def run_unit_tests(
         resolved_dir = resolve_item_value(dir, item, context, required_as="dir")
         resolved_property = resolve_item_value(property, item, context, required_as="property")
 
+        if isinstance(resolved_dir, str):
+            format_data = {**item.data, 'id': item.id}
+            resolved_dir = format_template(resolved_dir, format_data)
+
         if isinstance(resolved_filename, str):
             format_data = {**item.data, 'id': item.id}
             resolved_filename = format_template(resolved_filename, format_data)
