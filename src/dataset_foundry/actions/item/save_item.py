@@ -32,8 +32,8 @@ def save_item(
         else:
             resolved_contents = str(resolved_contents)
 
-        resolved_dir.mkdir(parents=True, exist_ok=True)
         path = resolved_dir / resolved_filename
+        path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "w") as f:
             f.write(resolved_contents)
 
