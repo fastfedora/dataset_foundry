@@ -30,6 +30,7 @@ pipeline = Pipeline(
         run_unit_tests(filename="func_{id}_{function_name}_test.py", property="original_result"),
         log_item(properties=['original_result']),
         if_item("not item.data['original_result'].success", [
+            log_item(message="Regenerating unit tests for {id}..."),
             log_item(properties=['original_result.stdout']),
             generate_item(prompt=Key("prompts.regenerate_unit_tests")),
             save_item_chat(filename="chat_{id}_regenerate_unit_tests.yaml"),
