@@ -65,7 +65,7 @@ async def main_cli():
         type=str,
         env="DF_MODEL",
         default=DEFAULT_MODEL,
-        help=f"Model to use in format 'provider:model_name' (default: {DEFAULT_MODEL})"
+        help=f"Model to use in format 'provider/model_name' (default: {DEFAULT_MODEL})"
     )
     parser.add_argument(
         "--temperature",
