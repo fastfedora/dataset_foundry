@@ -18,7 +18,7 @@ pipeline = Pipeline(
             parser=(lambda _content, _context: output_parser),
         ),
     ],
-    actions=[
+    steps=[
         save_item(filename="spec_{id}.yaml", format="yaml")
     ]
 )

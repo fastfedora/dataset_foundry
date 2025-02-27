@@ -8,7 +8,7 @@ pipeline = Pipeline(
     setup=[
         load_dataset_from_directory(include="{id|[0-9]*}_{function_name}/info.yaml"),
     ],
-    actions=[
+    steps=[
         run_unit_tests(filename="{id}_{function_name}/item_{id}_{function_name}_test.py"),
         log_item(properties=['test_result']),
         if_item("not item.data['test_result'].success", [

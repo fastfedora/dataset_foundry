@@ -47,7 +47,7 @@ pipeline = Pipeline(
         load_context(filename="config.yaml"),
         load_dataset(filename="specs.yaml", property="spec"),
     ],
-    actions=[
+    steps=[
         load_item(
             filename=(lambda item: f"item_{item.id}_{item.data['spec']['name']}_test.py"),
             property="unit_tests",

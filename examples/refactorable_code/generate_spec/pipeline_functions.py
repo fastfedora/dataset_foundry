@@ -10,7 +10,7 @@ pipeline = Pipeline(
       load_context(filename="config.yaml"),
       generate_dataset(prompt=Key("prompts.generate_functions")),
     ],
-    actions=[
+    steps=[
       parse_item(code_block="yaml", output_key="specs"),
       save_item(contents=Key("specs"), filename="specs.yaml")
     ]

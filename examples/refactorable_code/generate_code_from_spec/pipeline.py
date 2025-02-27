@@ -47,7 +47,7 @@ pipeline = Pipeline(
         load_context(filename="config.yaml"),
         load_dataset(filename="specs.yaml", property="spec"),
     ],
-    actions=[
+    steps=[
         generate_item(prompt=build_prompt),
         save_item_chat(filename="chat_{id}.yaml"),
         parse_item(code_block="json"),

@@ -14,7 +14,7 @@ pipeline = Pipeline(
         load_context(filename="config.yaml"),
         load_dataset(filename="specs.yaml", property="spec"),
     ],
-    actions=[
+    steps=[
         generate_item(prompt=Key("prompts.generate_functions")),
         save_item_chat(filename="chat_generate_all_from_spec_{id}.yaml"),
         parse_item(xml_block="function", output_key="code"),

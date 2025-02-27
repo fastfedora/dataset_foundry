@@ -12,7 +12,7 @@ pipeline = Pipeline(
         load_context(filename="config.yaml"),
         load_dataset(filename="specs.yaml"),
     ],
-    actions=[
+    steps=[
         generate_item(prompt=Key("prompts.generate")),
         save_item_chat(filename="chat_{id}_unit_tests_from_spec.yaml"),
         parse_item(code_block="python", output_key="code"),

@@ -11,19 +11,19 @@ class Pipeline:
     """
     A pipeline that can be used to process a dataset.
     """
-    _process_actions: List[Callable]
-    _setup_actions: List[Callable] = None
-    _teardown_actions: List[Callable] = None
+    _process_steps: List[Callable]
+    _setup_steps: List[Callable] = None
+    _teardown_steps: List[Callable] = None
 
     def __init__(
             self,
-            actions: List[Callable],
+            steps: List[Callable],
             setup: Optional[List[Callable]] = None,
             teardown: Optional[List[Callable]] = None
         ):
-        self._process_actions = actions
-        self._setup_actions = setup
-        self._teardown_actions = teardown
+        self._process_steps = steps
+        self._setup_steps = setup
+        self._teardown_steps = teardown
 
     async def run(
             self,
@@ -42,9 +42,9 @@ class Pipeline:
         await self.teardown(dataset, context)
 
     async def setup(self, dataset: Dataset, context: Context):
-        if self._setup_actions:
+        if self._setup_steps:
             logger.info("Setting up pipeline")
-            for action in self._setup_actions:
+            for action in self._setup_steps:
                 # TODO: Add error handling [twl 7.Feb.25]
                 await action(dataset, context)
 
@@ -55,12 +55,12 @@ class Pipeline:
             await self.process_data_item(item, context)
 
     async def teardown(self, dataset: Optional[Dataset], context: Optional[Context]):
-        if self._teardown_actions:
+        if self._teardown_steps:
             logger.info("Tearing down pipeline")
-            for action in self._teardown_actions:
+            for action in self._teardown_steps:
                 await action(dataset, context)
 
     async def process_data_item(self, item: Optional[DatasetItem], context: Optional[Context]):
         # TODO: Add error handling [twl 7.Feb.25]
-        for action in self._process_actions:
+        for action in self._process_steps:
             await action(item, context)

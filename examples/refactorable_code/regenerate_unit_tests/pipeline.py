@@ -26,7 +26,7 @@ pipeline = Pipeline(
             merge=True,
         ),
     ],
-    actions=[
+    steps=[
         run_unit_tests(filename="item_{id}_{function_name}_test.py", property="original_result"),
         log_item(properties=['original_result']),
         if_item("not item.data['original_result'].success", [
