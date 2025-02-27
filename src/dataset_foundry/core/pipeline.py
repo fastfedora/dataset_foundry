@@ -44,6 +44,7 @@ class Pipeline(ABC):
             context: Context
         ) -> Dataset:
         for step in steps:
+            # TODO: Consider removing this in favor of `run_pipeline` [fastfedora 27.Feb.25]
             if isinstance(step, Pipeline):
                 dataset = await step.run(dataset, context)
             else:
