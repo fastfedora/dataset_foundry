@@ -15,9 +15,9 @@ pipeline = Pipeline(
         load_dataset(filename="specs.yaml", property="spec"),
     ],
     actions=[
-        generate_item(prompt=Key("prompts.generate_functions_and_classes")),
+        generate_item(prompt=Key("prompts.generate_functions")),
         save_item_chat(filename="chat_generate_all_from_spec_{id}.yaml"),
-        parse_item(xml_block="code", output_key="code"),
+        parse_item(xml_block="function", output_key="code"),
         parse_item(xml_block="unit_tests", output_key="unit_tests"),
         save_item(contents=Key("code"), filename="item_{id}_{spec.name}.py"),
         save_item(contents=Key("unit_tests"), filename="item_{id}_{spec.name}_test.py"),

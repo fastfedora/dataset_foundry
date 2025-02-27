@@ -1,5 +1,5 @@
 prompts:
-  generate: |-
+  generate_functions: |-
     You are tasked with generating a list of diverse, real-world scenarios that can be used to
     create functions. Each scenario should be grounded in common software development challenges and
     must naturally lead to code that, while functionally correct, has room for refactoring due to
@@ -23,5 +23,88 @@ prompts:
 
     The goal is to ensure that the resulting functions are realistic, embody real-world complexity,
     and have deliberate areas for improvement during refactoring.
+
+    Return the final list of specs as an array in YAML format wrapped within a ```yaml code block.
+
+  generate_functions_and_classes: |-
+    You are tasked with generating a list of diverse, real-world scenarios that can be used to
+    create functions or classes. Each scenario should be grounded in common software development
+    challenges and must naturally lead to code that, while functionally correct, has significant
+    opportunities for refactoring. These opportunities might include eliminating code smells such as
+    duplicated code, deep nesting, unclear naming, and magic numbers, as well as challenges related
+    to translating between different coding paradigms (for example, converting procedural code to
+    object-oriented design or vice versa).
+
+    Please produce a list of {num_samples} distinct scenarios. For each scenario, include:
+
+    1. purpose: A description of the real-world purpose of the function or class.
+    2. type: Indicate whether the scenario is for a function or a class.
+    3. name: The name of the function or class.
+    4. interface: For a function, the signature of the function. Ensure that this is enclosed in
+       quotes in the YAML. For a class, a spec which includes the name of the class, the parameters
+       for its constructor, and the signatures of each method of the class. Ensure that each
+       signature is enclosed in quotes in the YAML.
+    5. length: Specify the expected code length, ranging between 1000-5000 lines.
+    6. code_smells: List the types of issues the code should contain that require refactoring, such
+       as:
+        - Multiple concerns (the code does more than one thing)
+        - Magic numbers (unexplained numeric literals)
+        - Duplicated code
+        - Unclear variable or method names
+        - Deep nesting or overly complex control structures
+    7. language: Specify the programming language for the code. For now, always use "python".
+    8. constraints: Detail any constraints or edge cases that might be encountered.
+    9. refactoring_challenges: Identify additional challenges that encourage refactoring, including:
+      - Removing or mitigating code smells
+      - Translating between different coding paradigms (e.g., from procedural to object-oriented or
+        functional styles)
+      - Enhancing modularity and separation of concerns
+    10. potential_pitfalls: Provide hints about potential pitfalls or design challenges that may
+        arise, encouraging developers to write code that is both robust and amenable to refactoring.
+
+    The goal is to ensure that the resulting code is realistic, embodies real-world complexity, and
+    deliberately contains areas that can be improved through refactoring—not only by removing code
+    smells but also by rethinking and possibly translating the underlying code paradigm.
+
+    Return the final list of specs as an array in YAML format wrapped within a ```yaml code block.
+
+  generate_all: |-
+    You are tasked with generating a list of diverse, real-world scenarios that can be used to
+    create functions, classes, or components. Each scenario should be grounded in common software
+    development challenges and must naturally lead to code that, while functionally correct, has
+    significant opportunities for refactoring. These opportunities might include eliminating code
+    smells such as duplicated code, deep nesting, unclear naming, and magic numbers, as well as
+    challenges related to translating between different coding paradigms (for example, converting
+    procedural code to object-oriented design or vice versa).
+
+    Please produce a list of {num_samples} distinct scenarios. For each scenario, include:
+
+    1. purpose: A description of the real-world purpose of the function, class, or component.
+    2. type: Indicate whether the scenario is for a function, a class, or a component.
+    3. name: The name of the function, class, or component.
+    4. signature: The signature of the function or class (if applicable). For components, provide a
+       brief description of the interface. Ensure that the signature or interface description is
+       enclosed in quotes in the YAML.
+    5. length: Specify the expected code length, ranging between 1000-5000 lines.
+    6. code_smells: List the types of issues the code should contain that require refactoring, such
+       as:
+        - Multiple concerns (the code does more than one thing)
+        - Magic numbers (unexplained numeric literals)
+        - Duplicated code
+        - Unclear variable or method names
+        - Deep nesting or overly complex control structures
+    7. language: Specify the programming language for the code. For now, always use "python".
+    8. constraints: Detail any constraints or edge cases that might be encountered.
+    9. refactoring_challenges: Identify additional challenges that encourage refactoring, including:
+      - Removing or mitigating code smells
+      - Translating between different coding paradigms (e.g., from procedural to object-oriented or
+        functional styles)
+      - Enhancing modularity and separation of concerns
+    10. potential_pitfalls: Provide hints about potential pitfalls or design challenges that may
+        arise, encouraging developers to write code that is both robust and amenable to refactoring.
+
+    The goal is to ensure that the resulting code is realistic, embodies real-world complexity, and
+    deliberately contains areas that can be improved through refactoring—not only by removing code
+    smells but also by rethinking and possibly translating the underlying code paradigm.
 
     Return the final list of specs as an array in YAML format wrapped within a ```yaml code block.

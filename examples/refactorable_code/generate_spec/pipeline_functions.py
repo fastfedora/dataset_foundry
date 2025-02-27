@@ -8,7 +8,7 @@ from dataset_foundry.core.pipeline import Pipeline
 pipeline = Pipeline(
     setup=[
       load_context(filename="config.yaml"),
-      generate_dataset(prompt=Key("prompts.generate_functions_and_classes")),
+      generate_dataset(prompt=Key("prompts.generate_functions")),
     ],
     actions=[
       parse_item(code_block="yaml", output_key="specs"),

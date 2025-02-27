@@ -18,7 +18,7 @@ prompts:
     {original_result.stderr}
     </stderr>
 
-    Here is the code for the function being tested:
+    Here is the code for the function or class being tested:
 
     <code>
     {code}

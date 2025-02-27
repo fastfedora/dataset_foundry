@@ -1,5 +1,5 @@
 prompts:
-  generate: |-
+  generate_functions: |-
     You are given a YAML specification that describes a function with real-world complexity and
     intentional code smells to encourage refactoring. The spec includes details such as the
     function's purpose, name, signature, desired length, specific code smells (e.g., multiple
@@ -42,6 +42,56 @@ prompts:
     Follow best practices for unit testing and include proper assertions for each test case. The
     units test should thoroughly test the function. Any libraries you anticipate being used by
     the function should be mocked.
+
+    Follow these additional instructions:
+
+      - Generate complete test functions using pytest style (no test class needed).
+      - Include proper imports and any necessary setup/teardown.
+      - Make sure to include proper assertions for each test case.
+
+  generate_functions_and_classes: |-
+    You are given a YAML specification that describes a function or class with real-world complexity
+    and intentional code smells to encourage refactoring. The spec includes details such as the
+    function or class's purpose, name, interface, desired length, specific code smells (e.g.,
+    multiple concerns, magic numbers, duplicated code, unclear variable names), language,
+    constraints, and potential pitfalls.
+
+    Your task is to produce two outputs:
+
+    1. **Function Code:**
+    Generate a Python function or class that adheres to the provided specification. The code must be
+    functionally correct but intentionally include the listed code smells and design issues. Ensure
+    the code meets the specified length requirement and reflects realistic, complex, and
+    refactorable real-world scenarios. Only use built-in Python libraries; do not use any libraries
+    that require being installed for the main function to execute. Also, do not add any comments
+    mentioning the code smells; comments unrelated to the code smells are allowed. Write the code as
+    a junior programmer would with the type of comments that a junior programmer would use.
+
+    2. **Unit Tests:**
+    Create a comprehensive suite of unit tests for the generated function or class using a testing
+    framework (e.g., `unittest` or `pytest`). The tests should cover:
+    - Normal cases (typical expected input)
+    - Edge cases (boundary conditions or unusual input)
+    - Error conditions (invalid inputs or exceptional scenarios)
+
+    These tests must be provided in a separate code block from the function code.
+
+    Please output the function or class code in between <code> XML tags and the unit tests in
+    between separate <unit_tests> XML tags. Do not put the XML tags within a code block or otherwise
+    use code block formatting, and do not enclose the code in ```python tags.
+
+    Here is an example YAML spec:
+
+    <spec>
+    {spec:yaml}
+    </spec>
+
+    When writing your unit tests, make sure to import the function or class being tested. The name
+    of the module can be derived from this template: item_{id}_{spec.name}
+
+    Follow best practices for unit testing and include proper assertions for each test case. The
+    units test should thoroughly test the function or class. Any libraries you anticipate being used
+    by the function or class should be mocked.
 
     Follow these additional instructions:
 
