@@ -34,6 +34,16 @@ class Pipeline(ABC):
         self._setup_steps = setup
         self._teardown_steps = teardown
 
+    async def _do_steps(
+            self,
+            steps: List[Callable],
+            dataset: Dataset,
+            context: Context
+        ):
+        for step in steps:
+            # TODO: Add error handling [twl 7.Feb.25]
+            await step(dataset, context)
+
     async def run(
             self,
             dataset: Optional[Dataset] = None,
@@ -73,9 +83,7 @@ class Pipeline(ABC):
         """
         if self._setup_steps:
             logger.info("Setting up pipeline")
-            for action in self._setup_steps:
-                # TODO: Add error handling [twl 7.Feb.25]
-                await action(dataset, context)
+            await self._do_steps(self._setup_steps, dataset, context)
 
     @abstractmethod
     async def execute(self, dataset: Optional[Dataset], context: Optional[Context]) -> None:
@@ -98,6 +106,4 @@ class Pipeline(ABC):
         """
         if self._teardown_steps:
             logger.info("Tearing down pipeline")
-            for action in self._teardown_steps:
-                # TODO: Add error handling [twl 7.Feb.25]
-                await action(dataset, context)
+            await self._do_steps(self._teardown_steps, dataset, context)
