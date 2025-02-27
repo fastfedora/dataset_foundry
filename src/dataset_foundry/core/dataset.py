@@ -30,3 +30,8 @@ class Dataset:
 
         if not merged:
             self.items.append(item)
+
+    def reset(self):
+        self._items_by_id = {}
+        self.metadata = {}
+        self.items = []
