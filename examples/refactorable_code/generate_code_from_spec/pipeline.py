@@ -53,14 +53,14 @@ pipeline = Pipeline(
         parse_item(code_block="json"),
         save_item(
             contents=(lambda item: item.data["code"]),
-            filename="func_{id}_{function_name}.py"
+            filename="item_{id}_{function_name}.py"
         ),
         save_item(
             contents=(lambda item: {
                 'id': item.id,
                 **omit(['code', 'response', 'messages', 'output'], item.data),
             }),
-            filename="func_{id}_{function_name}.json",
+            filename="item_{id}_{function_name}.json",
             format="json"
         ),
     ]

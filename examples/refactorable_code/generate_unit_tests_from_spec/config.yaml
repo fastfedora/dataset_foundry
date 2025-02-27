@@ -16,7 +16,7 @@ prompts:
     </spec>
 
     Make sure to import the function being tested. The name of the module can be derived from this
-    template: func_{id}_{name}
+    template: item_{id}_{name}
 
     Follow best practices for unit testing and include proper assertions for each test case. The
     units test should thoroughly test the function. Any libraries you anticipate being used by

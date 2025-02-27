@@ -105,11 +105,11 @@ Prompt templates and certain parameters are parsed as f-strings, with the follow
 
 For instance, if an item is being processed with an id of `123` and a `spec` dictionary with a
 `name` key of `my_function`, the following will save the `code` property of the item as a file named
-`func_123_my_function.py`:
+`item_123_my_function.py`:
 
 ```python
    ...
-   save_item(contents=Key("code"), filename="func_{id}_{spec.name}.py"),
+   save_item(contents=Key("code"), filename="item_{id}_{spec.name}.py"),
    ...
 ```
 

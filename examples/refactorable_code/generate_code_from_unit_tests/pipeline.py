@@ -49,7 +49,7 @@ pipeline = Pipeline(
     ],
     actions=[
         load_item(
-            filename=(lambda item: f"func_{item.id}_{item.data['spec']['name']}_test.py"),
+            filename=(lambda item: f"item_{item.id}_{item.data['spec']['name']}_test.py"),
             property="unit_tests",
         ),
         generate_item(prompt=build_prompt),
@@ -57,14 +57,14 @@ pipeline = Pipeline(
         parse_item(code_block="json"),
         save_item(
             contents=(lambda item: item.data["code"]),
-            filename="func_{id}_{function_name}.py"
+            filename="item_{id}_{function_name}.py"
         ),
         save_item(
             contents=(lambda item: {
                 'id': item.id,
                 **omit(['code', 'response', 'messages', 'output', 'unit_tests'], item.data),
             }),
-            filename="func_{id}_{function_name}.json",
+            filename="item_{id}_{function_name}.json",
             format="json"
         ),
     ]

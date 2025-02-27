@@ -13,21 +13,21 @@ from dataset_foundry.core.pipeline import Pipeline
 pipeline = Pipeline(
     setup=[
         load_context(filename="config.yaml"),
-        load_dataset_from_directory(include="func_{id|[0-9]*}_{function_name}.json"),
+        load_dataset_from_directory(include="item_{id|[0-9]*}_{function_name}.json"),
         load_dataset_from_directory(
-            include="func_{id|[0-9]*}_{function_name}.py",
-            exclude="func_{id|[0-9]*}_{function_name}_test.py",
+            include="item_{id|[0-9]*}_{function_name}.py",
+            exclude="item_{id|[0-9]*}_{function_name}_test.py",
             property="code",
             merge=True,
         ),
         load_dataset_from_directory(
-            include="func_{id|[0-9]*}_{function_name}_test.py",
+            include="item_{id|[0-9]*}_{function_name}_test.py",
             property="unit_tests",
             merge=True,
         ),
     ],
     actions=[
-        run_unit_tests(filename="func_{id}_{function_name}_test.py", property="original_result"),
+        run_unit_tests(filename="item_{id}_{function_name}_test.py", property="original_result"),
         log_item(properties=['original_result']),
         if_item("not item.data['original_result'].success", [
             log_item(message="Regenerating unit tests for {id}..."),
@@ -37,10 +37,10 @@ pipeline = Pipeline(
             parse_item(code_block="python", output_key="unit_tests"),
             save_item(
                 contents=(lambda item: item.data["unit_tests"]),
-                filename="func_{id}_{function_name}_test_updated.py",
+                filename="item_{id}_{function_name}_test_updated.py",
             ),
             run_unit_tests(
-                filename="func_{id}_{function_name}_test_updated.py",
+                filename="item_{id}_{function_name}_test_updated.py",
                 property="updated_result"
             ),
             log_item(properties=['updated_result']),
@@ -50,7 +50,7 @@ pipeline = Pipeline(
             if_item("item.data['updated_result'].num_passed > item.data['original_result'].num_passed", [
                 save_item(
                     contents=(lambda item: item.data["unit_tests"]),
-                    filename="func_{id}_{function_name}_test.py"
+                    filename="item_{id}_{function_name}_test.py"
                 ),
                 # TODO: Delete `_updated.py` file [fastfedora 15.Feb.25]
             ]),

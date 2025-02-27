@@ -6,19 +6,19 @@ from dataset_foundry.core.pipeline import Pipeline
 
 pipeline = Pipeline(
     setup=[
-        load_dataset_from_directory(include="func_{id|[0-9]*}_{function_name}.json"),
+        load_dataset_from_directory(include="item_{id|[0-9]*}_{function_name}.json"),
         # TODO: This captures the `_test` file too. Figure out a way to get a good regex here, or
         #       just add an `exclude` pattern and rename `files` to be `include`
         #       [fastfedora 11.Feb.25]
         #
         # load_dataset_from_directory(
-        #     files="func_{id|[0-9]*}_{function_name|^(?!.*_test$)[\w-]+$}.py",
+        #     files="item_{id|[0-9]*}_{function_name|^(?!.*_test$)[\w-]+$}.py",
         #     property="code",
         #     merge=True,
         # ),
     ],
     actions=[
-        run_unit_tests(filename="func_{id}_{function_name}_test.py"),
+        run_unit_tests(filename="item_{id}_{function_name}_test.py"),
         log_item(properties=['test_result']),
         if_item("not item.data['test_result'].success", [
             log_item(properties=['test_result.stdout']),

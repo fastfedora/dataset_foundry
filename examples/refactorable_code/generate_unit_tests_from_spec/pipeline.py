@@ -18,7 +18,7 @@ pipeline = Pipeline(
         parse_item(code_block="python", output_key="code"),
         save_item(
             contents=(lambda item: item.data["code"]),
-            filename="func_{id}_{name}_test.py",
+            filename="item_{id}_{name}_test.py",
         ),
     ]
 )

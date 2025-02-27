@@ -19,14 +19,14 @@ pipeline = Pipeline(
         save_item_chat(filename="chat_generate_all_from_spec_{id}.yaml"),
         parse_item(xml_block="function", output_key="code"),
         parse_item(xml_block="unit_tests", output_key="unit_tests"),
-        save_item(contents=Key("code"), filename="func_{id}_{spec.name}.py"),
-        save_item(contents=Key("unit_tests"), filename="func_{id}_{spec.name}_test.py"),
+        save_item(contents=Key("code"), filename="item_{id}_{spec.name}.py"),
+        save_item(contents=Key("unit_tests"), filename="item_{id}_{spec.name}_test.py"),
         save_item(
             contents=(lambda item: {
                 'id': item.id,
                 **omit(['code', 'response', 'messages', 'output', 'unit_tests'], item.data),
             }),
-            filename="func_{id}_{spec.name}.json",
+            filename="item_{id}_{spec.name}.json",
             format="json"
         ),
     ]
