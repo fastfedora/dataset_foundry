@@ -2,9 +2,9 @@ from dataset_foundry.actions.dataset.load_dataset_from_directory import load_dat
 from dataset_foundry.actions.item.if_item import if_item
 from dataset_foundry.actions.item.log_item import log_item
 from dataset_foundry.actions.item.run_unit_tests import run_unit_tests
-from dataset_foundry.core.pipeline import Pipeline
+from dataset_foundry.core.item_pipeline import ItemPipeline
 
-pipeline = Pipeline(
+pipeline = ItemPipeline(
     setup=[
         load_dataset_from_directory(include="item_{id|[0-9]*}_{function_name}.json"),
         # TODO: This captures the `_test` file too. Figure out a way to get a good regex here, or

@@ -14,7 +14,7 @@ from dataset_foundry.actions.item.parse_item import parse_item
 from dataset_foundry.actions.item.save_item import save_item
 from dataset_foundry.core.context import Context
 from dataset_foundry.core.dataset_item import DatasetItem
-from dataset_foundry.core.pipeline import Pipeline
+from dataset_foundry.core.item_pipeline import ItemPipeline
 from dataset_foundry.utils.collections.omit import omit
 from dataset_foundry.utils.get_model_fields import get_model_fields
 
@@ -42,7 +42,7 @@ def build_prompt(item: DatasetItem, context: Context):
         example=context['prompts']['refactor_example'],
     )
 
-pipeline = Pipeline(
+pipeline = ItemPipeline(
     setup=[
         load_context(filename="config.yaml"),
         load_dataset(filename="specs.yaml", property="spec"),

@@ -5,9 +5,9 @@ from dataset_foundry.actions.item.save_item_chat import save_item_chat
 from dataset_foundry.actions.item.parse_item import parse_item
 from dataset_foundry.actions.item.save_item import save_item
 from dataset_foundry.core.key import Key
-from dataset_foundry.core.pipeline import Pipeline
+from dataset_foundry.core.item_pipeline import ItemPipeline
 
-pipeline = Pipeline(
+pipeline = ItemPipeline(
     setup=[
         load_context(filename="config.yaml"),
         load_dataset(filename="specs.yaml"),

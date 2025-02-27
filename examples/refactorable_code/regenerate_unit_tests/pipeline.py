@@ -8,9 +8,9 @@ from dataset_foundry.actions.item.parse_item import parse_item
 from dataset_foundry.actions.item.run_unit_tests import run_unit_tests
 from dataset_foundry.actions.item.save_item import save_item
 from dataset_foundry.core.key import Key
-from dataset_foundry.core.pipeline import Pipeline
+from dataset_foundry.core.item_pipeline import ItemPipeline
 
-pipeline = Pipeline(
+pipeline = ItemPipeline(
     setup=[
         load_context(filename="config.yaml"),
         load_dataset_from_directory(include="item_{id|[0-9]*}_{function_name}.json"),
