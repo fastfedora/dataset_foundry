@@ -1,4 +1,5 @@
 import re
+import logging
 from typing import Callable, Optional, Union
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -10,6 +11,8 @@ from ...core.key import Key
 from ...utils.params.resolve_dataset_value import resolve_dataset_value
 
 variable_regex = r'\{([^}]+)\}'
+
+logger = logging.getLogger(__name__)
 
 def generate_dataset(
         prompt: Union[Callable,Key,str] = Key("prompt"),
