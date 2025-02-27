@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from dataset_foundry.actions.dataset.load_dataset_from_directory import load_dataset_from_directory
 from dataset_foundry.actions.dataset.load_context import load_context
 from dataset_foundry.actions.item.generate_item import generate_item
@@ -11,8 +13,9 @@ from dataset_foundry.core.key import Key
 from dataset_foundry.core.item_pipeline import ItemPipeline
 
 pipeline = ItemPipeline(
+    name="regenerate_unit_tests",
     setup=[
-        load_context(filename="config.yaml"),
+        load_context(dir=Path(__file__).parent, filename="config.yaml"),
         load_dataset_from_directory(include="item_{id|[0-9]*}_{function_name}.json"),
         load_dataset_from_directory(
             include="item_{id|[0-9]*}_{function_name}.py",

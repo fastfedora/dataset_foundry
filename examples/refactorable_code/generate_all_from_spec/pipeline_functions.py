@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from dataset_foundry.actions.dataset.load_dataset import load_dataset
 from dataset_foundry.actions.dataset.load_context import load_context
 from dataset_foundry.actions.dataset.load_context import load_context
@@ -10,8 +12,9 @@ from dataset_foundry.core.item_pipeline import ItemPipeline
 from dataset_foundry.utils.collections.omit import omit
 
 pipeline = ItemPipeline(
+    name="generate_all_from_spec_functions",
     setup=[
-        load_context(filename="config.yaml"),
+        load_context(dir=Path(__file__).parent, filename="config.yaml"),
         load_dataset(filename="specs.yaml", property="spec"),
     ],
     steps=[

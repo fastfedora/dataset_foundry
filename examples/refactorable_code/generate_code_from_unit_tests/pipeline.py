@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Any, Optional
 from pydantic import BaseModel, Field
 import yaml
@@ -43,8 +44,9 @@ def build_prompt(item: DatasetItem, context: Context):
     )
 
 pipeline = ItemPipeline(
+    name="generate_code_from_unit_tests",
     setup=[
-        load_context(filename="config.yaml"),
+        load_context(dir=Path(__file__).parent, filename="config.yaml"),
         load_dataset(filename="specs.yaml", property="spec"),
     ],
     steps=[

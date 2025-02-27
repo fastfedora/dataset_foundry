@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from dataset_foundry.actions.dataset.generate_dataset import generate_dataset
 from dataset_foundry.actions.dataset.load_context import load_context
 from dataset_foundry.actions.item.save_item import save_item
@@ -11,8 +13,9 @@ def output_parser(content):
     return yaml.safe_load(extract_code_block(content, "yaml"))
 
 pipeline = ItemPipeline(
+    name="generate_spec_multiple_files",
     setup=[
-        load_context(filename="config.yaml"),
+        load_context(dir=Path(__file__).parent, filename="config.yaml"),
         generate_dataset(
             prompt=Key("prompts.generate"),
             parser=(lambda _content, _context: output_parser),
