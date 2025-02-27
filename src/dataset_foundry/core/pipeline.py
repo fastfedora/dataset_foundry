@@ -73,6 +73,9 @@ class Pipeline(ABC):
         if args:
             context.update(args)
 
+        if self.name:
+            logger.info(f"Running pipeline: {self.name}")
+
         await self.setup(dataset, context)
         await self.execute(dataset, context)
         await self.teardown(dataset, context)
