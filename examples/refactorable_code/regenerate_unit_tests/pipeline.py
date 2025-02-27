@@ -16,7 +16,7 @@ pipeline = Pipeline(
         load_dataset_from_directory(include="item_{id|[0-9]*}_{function_name}.json"),
         load_dataset_from_directory(
             include="item_{id|[0-9]*}_{function_name}.py",
-            exclude="item_{id|[0-9]*}_{function_name}_test.py",
+            exclude="item_{id|[0-9]*}_{function_name}_test*.py",
             property="code",
             merge=True,
         ),
