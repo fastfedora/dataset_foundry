@@ -15,8 +15,8 @@ class DatasetPipeline(Pipeline):
 
     def __init__(
             self,
-            name: str,
             steps: List[PipelineAction],
+            name: Optional[str] = None,
             setup: Optional[List[PipelineAction]] = None,
             teardown: Optional[List[PipelineAction]] = None
         ):

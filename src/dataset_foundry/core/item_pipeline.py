@@ -17,8 +17,8 @@ class ItemPipeline(Pipeline):
 
     def __init__(
             self,
-            name: str,
             steps: List[ItemAction],
+            name: Optional[str] = None,
             setup: Optional[List[PipelineAction]] = None,
             teardown: Optional[List[PipelineAction]] = None
         ):
