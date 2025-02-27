@@ -1,34 +1,37 @@
 from abc import ABC, abstractmethod
 import logging
-from typing import List, Optional, Callable
+from typing import List, Optional, TypeAlias
 
+from ..types.dataset_action import DatasetAction
 from .dataset import Dataset
 from .context import Context
 
 logger = logging.getLogger(__name__)
 
+PipelineAction: TypeAlias = DatasetAction | 'Pipeline'
+
 class Pipeline(ABC):
     """
     A pipeline that can be used to process data.
     """
-    _setup_steps: Optional[List[Callable]] = None
-    _teardown_steps: Optional[List[Callable]] = None
+    _setup_steps: Optional[List[PipelineAction]] = None
+    _teardown_steps: Optional[List[PipelineAction]] = None
 
     name: Optional[str] = None
 
     def __init__(
             self,
             name: Optional[str] = None,
-            setup: Optional[List[Callable]] = None,
-            teardown: Optional[List[Callable]] = None
+            setup: Optional[List[PipelineAction]] = None,
+            teardown: Optional[List[PipelineAction]] = None
         ):
         """
         Initialize the pipeline.
 
         Args:
             name (Optional[str]): The name of the pipeline.
-            setup (Optional[List[Callable]]): The setup steps to run before processing.
-            teardown (Optional[List[Callable]]): The teardown steps to run after processing.
+            setup (Optional[List[PipelineAction]]): The setup steps to run before processing.
+            teardown (Optional[List[PipelineAction]]): The teardown steps to run after processing.
         """
         self.name = name
         self._setup_steps = setup
@@ -36,13 +39,18 @@ class Pipeline(ABC):
 
     async def _do_steps(
             self,
-            steps: List[Callable],
+            steps: List[PipelineAction],
             dataset: Dataset,
             context: Context
-        ):
+        ) -> Dataset:
         for step in steps:
-            # TODO: Add error handling [twl 7.Feb.25]
-            await step(dataset, context)
+            if isinstance(step, Pipeline):
+                dataset = await step.run(dataset, context)
+            else:
+                # TODO: Add error handling [twl 7.Feb.25]
+                await step(dataset, context)
+
+        return dataset
 
     async def run(
             self,

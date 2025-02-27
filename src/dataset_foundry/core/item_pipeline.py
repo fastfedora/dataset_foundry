@@ -4,7 +4,7 @@ from typing import List, Optional, Callable
 from .dataset import Dataset
 from .dataset_item import DatasetItem
 from .context import Context
-from .pipeline import Pipeline
+from .pipeline import Pipeline, PipelineAction
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +18,8 @@ class ItemPipeline(Pipeline):
             self,
             name: str,
             steps: List[Callable],
-            setup: Optional[List[Callable]] = None,
-            teardown: Optional[List[Callable]] = None
+            setup: Optional[List[PipelineAction]] = None,
+            teardown: Optional[List[PipelineAction]] = None
         ):
         """
         Initialize the item pipeline.
@@ -27,8 +27,9 @@ class ItemPipeline(Pipeline):
         Args:
             name (str): The name of the pipeline.
             steps (List[Callable]): The steps to execute on each item.
-            setup (Optional[List[Callable]]): The steps to setup the dataset before processing
-            teardown (Optional[List[Callable]]): The steps to cleanup resources after processing.
+            setup (Optional[List[PipelineAction]]): The steps to setup the dataset before processing
+            teardown (Optional[List[PipelineAction]]): The steps to cleanup resources after
+                processing.
         """
         super().__init__(name=name, setup=setup, teardown=teardown)
         self._item_steps = steps
