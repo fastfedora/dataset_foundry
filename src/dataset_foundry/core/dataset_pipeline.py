@@ -41,5 +41,5 @@ class DatasetPipeline(Pipeline):
             dataset (Dataset): The dataset to process.
             context (Context): The context to use for processing.
         """
-        logger.info(f"Processing {len(self.steps)} dataset pipeline steps")
-        await super._do_steps(self._steps, dataset, context)
+        logger.info(f"Processing {len(self._steps)} dataset pipeline steps")
+        await super()._do_steps(self._steps, dataset, context)
