@@ -58,6 +58,8 @@ class Pipeline(ABC):
         await self.execute(dataset, context)
         await self.teardown(dataset, context)
 
+        return dataset
+
     async def setup(self, dataset: Optional[Dataset], context: Context) -> Dataset:
         """
         Setup the pipeline and prepare the dataset for processing.
