@@ -6,6 +6,7 @@ import yaml
 from ...core.context import Context
 from ...core.dataset_item import DatasetItem
 from ...core.key import Key
+from ...types.item_action import DatasetItemAction
 from ...utils.params.resolve_item_value import resolve_item_value
 from ...utils.format.format_template import format_template
 
@@ -16,7 +17,7 @@ def load_item(
         dir: Union[Callable,Key,str] = Key("input_dir"),
         property: Union[Callable,Key,str] = None,
         format: Optional[Union[Callable,Literal['auto', 'text', 'json', 'yaml']]] = 'auto',
-    ):
+    ) -> DatasetItemAction:
     async def load_item_action(item: DatasetItem, context: Context):
         resolved_dir = resolve_item_value(dir, item, context, required_as="dir")
         resolved_filename = resolve_item_value(filename, item, context, required_as="filename")

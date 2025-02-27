@@ -8,6 +8,7 @@ from ...core.context import Context
 from ...core.dataset import Dataset
 from ...core.dataset_item import DatasetItem
 from ...core.key import Key
+from ...types.dataset_action import DatasetAction
 from ...utils.params.resolve_dataset_value import resolve_dataset_value
 
 variable_regex = r'\{([^}]+)\}'
@@ -19,7 +20,7 @@ def generate_dataset(
         model: Union[Callable,Key,str] = Key("model"),
         parser: Optional[Union[Callable,Key,str]] = None,
         output_key: Optional[Union[Callable,Key,str]] = None,
-    ):
+    ) -> DatasetAction:
     async def generate_dataset_action(dataset: Dataset, context: Context):
         resolved_prompt = resolve_dataset_value(prompt, dataset, context, required_as="prompt")
         resolved_model = resolve_dataset_value(model, dataset, context, required_as="model")

@@ -6,6 +6,7 @@ from ...core.context import Context
 from ...core.dataset import Dataset
 from ...core.dataset_item import DatasetItem
 from ...core.key import Key
+from ...types.dataset_action import DatasetAction
 from ...utils.params.resolve_dataset_value import resolve_dataset_value
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,7 @@ def load_dataset(
         filename: Union[Callable,Key,str] = "dataset.yaml",
         dir: Union[Callable,Key,str] = Key("input_dir"),
         property: Union[Callable,Key,str] = None,
-    ):
+    ) -> DatasetAction:
     async def load_dataset_action(dataset: Dataset, context: Context):
         resolved_dir = resolve_dataset_value(dir, dataset, context, required_as="dir")
         resolved_file = resolve_dataset_value(filename, dataset, context, required_as="filename")

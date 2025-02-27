@@ -7,6 +7,7 @@ from ...core.context import Context
 from ...core.dataset import Dataset
 from ...core.dataset_item import DatasetItem
 from ...core.key import Key
+from ...types.dataset_action import DatasetAction
 from ...utils.params.resolve_dataset_value import resolve_dataset_value
 from ...utils.find_files import find_files
 
@@ -19,7 +20,7 @@ def load_dataset_from_directory(
         property: Union[Callable,Key,str] = None,
         format: Optional[Union[Callable,Literal['auto', 'text', 'json', 'yaml']]] = 'auto',
         merge: bool = False,
-    ):
+    ) -> DatasetAction:
     async def load_dataset_from_directory_action(dataset: Dataset, context: Context):
         resolved_dir = resolve_dataset_value(dir, dataset, context, required_as="dir")
         resolved_include = resolve_dataset_value(include, dataset, context, required_as="include")

@@ -5,6 +5,7 @@ import logging
 from ...core.context import Context
 from ...core.dataset_item import DatasetItem
 from ...core.key import Key
+from ...types.item_action import DatasetItemAction
 from ...utils.get import get
 from ...utils.params.resolve_item_value import resolve_item_value
 from ...utils.format.format_template import format_template
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 def log_item(
         properties: Optional[List[str]] = None,
         message: Optional[Union[Callable,Key,str]] = None,
-    ):
+    ) -> DatasetItemAction:
     async def log_item_action(item: DatasetItem, context: Context):
         resolved_message = resolve_item_value(message, item, context)
 

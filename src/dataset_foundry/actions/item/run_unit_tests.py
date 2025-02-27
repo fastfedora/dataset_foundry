@@ -3,6 +3,7 @@ from typing import Callable, Union
 from ...core.context import Context
 from ...core.dataset_item import DatasetItem
 from ...core.key import Key
+from ...types.item_action import DatasetItemAction
 from ...utils.params.resolve_item_value import resolve_item_value
 from ...utils.unit_tests.run_python_unit_tests import run_python_unit_tests
 from ...utils.format.format_template import format_template
@@ -11,7 +12,7 @@ def run_unit_tests(
         filename: Union[Callable,Key,str],
         dir: Union[Callable,Key,str] = Key("input_dir"),
         property: Union[Callable,Key,str] = "test_result",
-    ):
+    ) -> DatasetItemAction:
     async def run_unit_tests_action(item: DatasetItem, context: Context):
         resolved_filename = resolve_item_value(filename, item, context, required_as="filename")
         resolved_dir = resolve_item_value(dir, item, context, required_as="dir")
