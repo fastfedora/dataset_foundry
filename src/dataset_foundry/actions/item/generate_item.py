@@ -5,7 +5,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from ...core.context import Context
 from ...core.dataset_item import DatasetItem
 from ...core.key import Key
-from ...types.item_action import DatasetItemAction
+from ...types.item_action import ItemAction
 from ...utils.params.resolve_item_value import resolve_item_value
 from ...utils.format.preprocess_template import preprocess_template
 
@@ -17,7 +17,7 @@ def build_prompt(user: str, variables: dict):
 def generate_item(
         prompt: Union[Callable,Key,str] = Key("prompt"),
         model: Union[Callable,Key,str] = Key("model"),
-    ) -> DatasetItemAction:
+    ) -> ItemAction:
     async def generate_item_action(item: DatasetItem, context: Context):
         resolved_prompt = resolve_item_value(prompt, item, context, required_as="prompt")
         resolved_model = resolve_item_value(model, item, context, required_as="model")

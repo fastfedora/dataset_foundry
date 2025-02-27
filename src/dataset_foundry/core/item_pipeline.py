@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional
 
-from ..types.item_action import DatasetItemAction
+from ..types.item_action import ItemAction
 from .dataset import Dataset
 from .dataset_item import DatasetItem
 from .context import Context
@@ -13,12 +13,12 @@ class ItemPipeline(Pipeline):
     """
     A pipeline that can be used to process a dataset of items.
     """
-    _steps: List[DatasetItemAction]
+    _steps: List[ItemAction]
 
     def __init__(
             self,
             name: str,
-            steps: List[DatasetItemAction],
+            steps: List[ItemAction],
             setup: Optional[List[PipelineAction]] = None,
             teardown: Optional[List[PipelineAction]] = None
         ):
@@ -27,7 +27,7 @@ class ItemPipeline(Pipeline):
 
         Args:
             name (str): The name of the pipeline.
-            steps (List[DatasetItemAction]): The steps to execute on each item.
+            steps (List[ItemAction]): The steps to execute on each item.
             setup (Optional[List[PipelineAction]]): The steps to setup the dataset before processing
             teardown (Optional[List[PipelineAction]]): The steps to cleanup resources after
                 processing.

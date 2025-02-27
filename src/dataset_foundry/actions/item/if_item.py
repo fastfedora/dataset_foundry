@@ -2,11 +2,11 @@ import logging
 
 from ...core.context import Context
 from ...core.dataset_item import DatasetItem
-from ...types.item_action import DatasetItemAction
+from ...types.item_action import ItemAction
 
 logger = logging.getLogger(__name__)
 
-def if_item(condition: str, actions: list) -> DatasetItemAction:
+def if_item(condition: str, actions: list) -> ItemAction:
     """
     Creates an action that executes a list of actions if the given condition is met.
 

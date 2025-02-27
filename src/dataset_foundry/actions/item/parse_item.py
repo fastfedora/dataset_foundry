@@ -4,7 +4,7 @@ import json
 from ...core.context import Context
 from ...core.dataset_item import DatasetItem
 from ...core.key import Key
-from ...types.item_action import DatasetItemAction
+from ...types.item_action import ItemAction
 from ...utils.params.resolve_item_value import resolve_item_value
 from ...utils.parse.extract_code_block import extract_code_block
 from ...utils.parse.extract_xml_block import extract_xml_block
@@ -15,7 +15,7 @@ def parse_item(
         parser: Optional[Union[Callable,Key,str]] = Key("parser"),
         code_block: Optional[Union[Callable,Key,str]] = None,
         xml_block: Optional[Union[Callable,Key,str]] = None,
-    ) -> DatasetItemAction:
+    ) -> ItemAction:
 
     async def parse_item_action(item: DatasetItem, context: Context):
         resolved_parser = resolve_item_value(parser, item, context)
