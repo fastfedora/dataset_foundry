@@ -15,6 +15,7 @@ from dataset_foundry.actions.item.parse_item import parse_item
 from dataset_foundry.actions.item.save_item import save_item
 from dataset_foundry.core.context import Context
 from dataset_foundry.core.dataset_item import DatasetItem
+from dataset_foundry.core.template import Template
 from dataset_foundry.utils.get_model_fields import get_model_fields
 from dataset_foundry.core.item_pipeline import ItemPipeline
 from dataset_foundry.utils.collections.omit import omit
@@ -55,18 +56,18 @@ pipeline = ItemPipeline(
             property="unit_tests",
         ),
         generate_item(prompt=build_prompt),
-        save_item_chat(filename="chat_{id}_code_from_unit_tests.yaml"),
+        save_item_chat(filename=Template("chat_{id}_code_from_unit_tests.yaml")),
         parse_item(code_block="json"),
         save_item(
             contents=(lambda item: item.data["code"]),
-            filename="item_{id}_{function_name}.py"
+            filename=Template("item_{id}_{function_name}.py")
         ),
         save_item(
             contents=(lambda item: {
                 'id': item.id,
                 **omit(['code', 'response', 'messages', 'output', 'unit_tests'], item.data),
             }),
-            filename="item_{id}_{function_name}.json",
+            filename=Template("item_{id}_{function_name}.json"),
             format="json"
         ),
     ]

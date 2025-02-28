@@ -8,6 +8,7 @@ from dataset_foundry.actions.item.parse_item import parse_item
 from dataset_foundry.actions.item.save_item import save_item
 from dataset_foundry.core.key import Key
 from dataset_foundry.core.item_pipeline import ItemPipeline
+from dataset_foundry.core.template import Template
 
 pipeline = ItemPipeline(
     name="generate_unit_tests_from_spec",
@@ -17,11 +18,11 @@ pipeline = ItemPipeline(
     ],
     steps=[
         generate_item(prompt=Key("prompts.generate")),
-        save_item_chat(filename="chat_{id}_unit_tests_from_spec.yaml"),
+        save_item_chat(filename=Template("chat_{id}_unit_tests_from_spec.yaml")),
         parse_item(code_block="python", output_key="code"),
         save_item(
             contents=(lambda item: item.data["code"]),
-            filename="item_{id}_{name}_test.py",
+            filename=Template("item_{id}_{name}_test.py"),
         ),
     ]
 )

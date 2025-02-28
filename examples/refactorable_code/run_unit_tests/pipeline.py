@@ -3,6 +3,7 @@ from dataset_foundry.actions.item.if_item import if_item
 from dataset_foundry.actions.item.log_item import log_item
 from dataset_foundry.actions.item.run_unit_tests import run_unit_tests
 from dataset_foundry.core.item_pipeline import ItemPipeline
+from dataset_foundry.core.template import Template
 
 pipeline = ItemPipeline(
     name="run_unit_tests",
@@ -19,7 +20,7 @@ pipeline = ItemPipeline(
         # ),
     ],
     steps=[
-        run_unit_tests(filename="item_{id}_{function_name}_test.py"),
+        run_unit_tests(filename=Template("item_{id}_{function_name}_test.py")),
         log_item(properties=['test_result']),
         if_item("not item.data['test_result'].success", [
             log_item(properties=['test_result.stdout']),
