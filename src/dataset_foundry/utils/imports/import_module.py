@@ -23,7 +23,7 @@ def import_module(module_path):
     module_name = module_path.stem
     spec = spec_from_file_location(module_name, module_path)
 
-    if not spec:
+    if spec is None:
         raise FileNotFoundError(f"Module {module_path} not found.")
 
     module = module_from_spec(spec)
