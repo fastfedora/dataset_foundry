@@ -1,7 +1,7 @@
 import re
 import yaml
 import json
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Optional
 
 from ...utils.get import get
 
@@ -15,7 +15,7 @@ DEFAULT_FORMATTERS = {
 def preprocess_template(
         template: str,
         variables: Dict[str, Any],
-        formatters: Dict[str, callable] = DEFAULT_FORMATTERS,
+        formatters: Optional[Dict[str, callable]] = None,
     ) -> Tuple[str, Dict[str, Any]]:
     """
     Preprocesses a template by:
@@ -26,12 +26,15 @@ def preprocess_template(
     Args:
         template (str): The input template with placeholders.
         variables (dict): The input variables to be formatted.
-        formatters (dict): A mapping of format names to formatting functions.
+        formatters (Optional[dict]): A mapping of format names to formatting functions.
 
     Returns:
         Tuple[str, Dict[str, Any]]: A new template with transformed variable names and updated
             values.
     """
+    if formatters is None:
+        formatters = DEFAULT_FORMATTERS
+
     new_variables = variables.copy()
 
     # Handle dotted references {var.subkey}

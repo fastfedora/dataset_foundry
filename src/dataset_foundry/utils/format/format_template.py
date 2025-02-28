@@ -1,11 +1,11 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from .preprocess_template import preprocess_template
 
 def format_template(
         template: str,
         variables: Dict[str, Any],
-        formatters: Dict[str, callable] = None,
+        formatters: Optional[Dict[str, callable]] = None,
     ) -> str:
     """
     Formats a template string with the given variables. Supports dotted references and
@@ -14,7 +14,7 @@ def format_template(
     Args:
         template (str): The template string to format.
         variables (dict): The variables to format the template with.
-        formatters (dict): A dictionary of formatters to use.
+        formatters (Optional[dict]): A dictionary of formatters to use.
 
     Returns:
         str: The formatted template string.
