@@ -10,8 +10,12 @@ class Template:
     """
     _text: str
 
+    @property
+    def text(self) -> str:
+        return self._text
+
     def __init__(self, text: str):
-        self.text = text
+        self._text = text
 
     def resolve(
             self,
