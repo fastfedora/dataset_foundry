@@ -14,7 +14,10 @@ def resolve_dataset_value(
     """
     Resolve a value using a dataset and context. If `value` is callable, it will be called with the
     dataset and context as arguments. If `value` is a Key, it will be resolved using the dataset's
-    metadata and the context. Otherwise, the value will be returned without modification.
+    metadata and the context. Otherwise, the value will be resolved as itself.
+
+    If the value is a Template, it will be further resolved using the dataset's metadata and
+    context, allowing for template strings like `{version}` or `{context.config_dir}`.
 
     Args:
         value: A function, key, or string that defines how to resolve the value.

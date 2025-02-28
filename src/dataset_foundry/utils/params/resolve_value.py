@@ -4,6 +4,7 @@ from typing import Any, Callable, Optional, Union
 
 from ...core.context import Context
 from ...core.key import Key
+from ...core.template import Template
 
 logger = logging.getLogger(__name__)
 
@@ -40,5 +41,11 @@ def resolve_value(
     logger.debug(
         f"Resolved '{value.path if isinstance(value, Key) else value}' to '{resolved_value}'"
     )
+
+    if isinstance(resolved_value, Template):
+        variables = { **data, 'context': context }
+        if hasattr(object, 'id'):
+            variables['id'] = object.id
+        resolved_value = resolved_value.resolve(variables)
 
     return resolved_value
