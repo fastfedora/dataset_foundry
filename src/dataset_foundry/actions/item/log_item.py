@@ -19,10 +19,6 @@ def log_item(
     async def log_item_action(item: DatasetItem, context: Context):
         resolved_message = resolve_item_value(message, item, context)
 
-        if isinstance(resolved_message, str):
-            format_data = {**item.data, 'id': item.id}
-            resolved_message = format_template(resolved_message, format_data)
-
         if (resolved_message):
             if properties:
                 raise ValueError("'properties' and 'message' cannot both be provided")

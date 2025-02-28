@@ -22,10 +22,6 @@ def save_item(
         resolved_contents = resolve_item_value(contents, item, context) or item.data
         resolved_format = resolve_item_value(format, item, context)
 
-        if isinstance(resolved_filename, str):
-            format_data = {**item.data, 'id': item.id}
-            resolved_filename = format_template(resolved_filename, format_data)
-
         if resolved_format == 'json':
             resolved_contents = json.dumps(resolved_contents, indent=2)
         elif resolved_format == 'yaml':

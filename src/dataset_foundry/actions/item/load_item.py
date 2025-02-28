@@ -24,10 +24,6 @@ def load_item(
         resolved_property = resolve_item_value(property, item, context)
         resolved_format = resolve_item_value(format, item, context)
 
-        if isinstance(resolved_filename, str):
-            format_data = {**item.data, 'id': item.id}
-            resolved_filename = format_template(resolved_filename, format_data)
-
         if resolved_format == "auto":
             if resolved_filename.endswith(".yaml") or resolved_filename.endswith(".yml"):
                 resolved_format = "yaml"

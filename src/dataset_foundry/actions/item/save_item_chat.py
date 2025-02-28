@@ -16,10 +16,6 @@ def save_item_chat(
         resolved_dir = resolve_item_value(dir, item, context, required_as="dir")
         resolved_filename = resolve_item_value(filename, item, context, required_as="filename")
 
-        if isinstance(resolved_filename, str):
-            format_data = {**item.data, 'id': item.id}
-            resolved_filename = format_template(resolved_filename, format_data)
-
         log_file = resolved_dir / resolved_filename
         save_messages(log_file, item.data["messages"], item.data["response"].content)
 
