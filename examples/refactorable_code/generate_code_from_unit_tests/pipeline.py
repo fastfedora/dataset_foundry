@@ -13,12 +13,14 @@ from dataset_foundry.actions.item.load_item import load_item
 from dataset_foundry.actions.item.save_item_chat import save_item_chat
 from dataset_foundry.actions.item.parse_item import parse_item
 from dataset_foundry.actions.item.save_item import save_item
+from dataset_foundry.actions.item.set_item_property import set_item_property
 from dataset_foundry.core.context import Context
 from dataset_foundry.core.dataset_item import DatasetItem
+from dataset_foundry.core.key import Key
 from dataset_foundry.core.template import Template
 from dataset_foundry.utils.get_model_fields import get_model_fields
 from dataset_foundry.core.item_pipeline import ItemPipeline
-from dataset_foundry.utils.collections.omit import omit
+from dataset_foundry.utils.collections.pick import pick
 
 class CodeSample(BaseModel):
     """A code sample that needs refactoring."""
@@ -51,24 +53,23 @@ pipeline = ItemPipeline(
         load_dataset(filename="specs.yaml", property="spec"),
     ],
     steps=[
-        load_item(
-            filename=(lambda item: f"item_{item.id}_{item.data['spec']['name']}_test.py"),
-            property="unit_tests",
-        ),
+        set_item_property(key="folder", value=Template("{id}_{spec.name}")),
+        set_item_property(key="source", value="source.py"),
+        set_item_property(key="test", value="test.py"),
+        load_item(filename=Template("{folder}/{test}"), property="unit_tests"),
         generate_item(prompt=build_prompt),
         save_item_chat(filename=Template("chat_{id}_code_from_unit_tests.yaml")),
         parse_item(code_block="json"),
-        save_item(
-            contents=(lambda item: item.data["code"]),
-            filename=Template("item_{id}_{function_name}.py")
-        ),
+        save_item(contents=Key("code"), filename=Template("{folder}/{source}")),
         save_item(
             contents=(lambda item: {
                 'id': item.id,
-                **omit(['code', 'response', 'messages', 'output', 'unit_tests'], item.data),
+                'name': item.data['spec']['name'],
+                'language': item.data['spec']['language'],
+                **pick(['spec', 'source', 'test'], item.data),
             }),
-            filename=Template("item_{id}_{function_name}.json"),
-            format="json"
+            filename=Template("{folder}/info.yaml"),
+            format="yaml"
         ),
     ]
 )

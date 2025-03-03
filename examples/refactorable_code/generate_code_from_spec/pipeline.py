@@ -11,13 +11,16 @@ from dataset_foundry.actions.dataset.load_context import load_context
 from dataset_foundry.actions.dataset.load_context import load_context
 from dataset_foundry.actions.item.generate_item import generate_item
 from dataset_foundry.actions.item.save_item_chat import save_item_chat
+from dataset_foundry.actions.item.set_item_property import set_item_property
 from dataset_foundry.actions.item.parse_item import parse_item
 from dataset_foundry.actions.item.save_item import save_item
 from dataset_foundry.core.context import Context
 from dataset_foundry.core.dataset_item import DatasetItem
 from dataset_foundry.core.item_pipeline import ItemPipeline
+from dataset_foundry.core.key import Key
 from dataset_foundry.core.template import Template
 from dataset_foundry.utils.collections.omit import omit
+from dataset_foundry.utils.collections.pick import pick
 from dataset_foundry.utils.get_model_fields import get_model_fields
 
 class CodeSample(BaseModel):
@@ -51,20 +54,21 @@ pipeline = ItemPipeline(
         load_dataset(filename="specs.yaml", property="spec"),
     ],
     steps=[
+        set_item_property(key="folder", value=Template("{id}_{spec.name}")),
+        set_item_property(key="source", value="source.py"),
         generate_item(prompt=build_prompt),
-        save_item_chat(filename=Template("chat_{id}.yaml")),
+        save_item_chat(filename=Template("chat_{id}_generate_code_from_spec.yaml")),
         parse_item(code_block="json"),
-        save_item(
-            contents=(lambda item: item.data["code"]),
-            filename=Template("item_{id}_{function_name}.py")
-        ),
+        save_item(contents=Key("code"), filename=Template("{folder}/{source}")),
         save_item(
             contents=(lambda item: {
                 'id': item.id,
-                **omit(['code', 'response', 'messages', 'output'], item.data),
+                'name': item.data['spec']['name'],
+                'language': item.data['spec']['language'],
+                **pick(['spec', 'source', 'test'], item.data),
             }),
-            filename=Template("item_{id}_{function_name}.json"),
-            format="json"
+            filename=Template("{folder}/info.yaml"),
+            format="yaml"
         ),
     ]
 )

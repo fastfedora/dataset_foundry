@@ -8,19 +8,10 @@ from dataset_foundry.core.template import Template
 pipeline = ItemPipeline(
     name="run_unit_tests",
     setup=[
-        load_dataset_from_directory(include="item_{id|[0-9]*}_{function_name}.json"),
-        # TODO: This captures the `_test` file too. Figure out a way to get a good regex here, or
-        #       just add an `exclude` pattern and rename `files` to be `include`
-        #       [fastfedora 11.Feb.25]
-        #
-        # load_dataset_from_directory(
-        #     files="item_{id|[0-9]*}_{function_name|^(?!.*_test$)[\w-]+$}.py",
-        #     property="code",
-        #     merge=True,
-        # ),
+        load_dataset_from_directory(include="{id|[0-9]*}_{function_name}/info.yaml"),
     ],
     steps=[
-        run_unit_tests(filename=Template("item_{id}_{function_name}_test.py")),
+        run_unit_tests(filename=Template("{id}_{function_name}/test.py")),
         log_item(properties=['test_result']),
         if_item("not item.data['test_result'].success", [
             log_item(properties=['test_result.stdout']),
