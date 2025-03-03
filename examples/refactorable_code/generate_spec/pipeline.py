@@ -2,6 +2,7 @@ from pathlib import Path
 
 from dataset_foundry.actions.dataset.generate_dataset import generate_dataset
 from dataset_foundry.actions.dataset.load_context import load_context
+from dataset_foundry.actions.item.log_item import log_item
 from dataset_foundry.actions.item.parse_item import parse_item
 from dataset_foundry.actions.item.save_item import save_item
 from dataset_foundry.core.key import Key
