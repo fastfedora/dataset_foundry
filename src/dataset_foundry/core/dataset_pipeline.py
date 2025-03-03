@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from typing import List, Optional
 
 from .dataset import Dataset
@@ -17,6 +18,7 @@ class DatasetPipeline(Pipeline):
             self,
             steps: List[PipelineAction],
             name: Optional[str] = None,
+            config: Optional[Path|str|dict] = {},
             setup: Optional[List[PipelineAction]] = None,
             teardown: Optional[List[PipelineAction]] = None
         ):
@@ -30,7 +32,7 @@ class DatasetPipeline(Pipeline):
             teardown (Optional[List[PipelineAction]]): The steps to cleanup resources after
                 processing.
         """
-        super().__init__(name=name, setup=setup, teardown=teardown)
+        super().__init__(name=name, config=config, setup=setup, teardown=teardown)
         self._steps = steps
 
     async def execute(self, dataset: Optional[Dataset], context: Optional[Context]) -> None:

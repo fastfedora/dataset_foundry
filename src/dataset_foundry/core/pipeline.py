@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 import logging
+from pathlib import Path
 from typing import List, Optional, TypeAlias
 
 from ..types.dataset_action import DatasetAction
+from .config import Config
 from .dataset import Dataset
 from .context import Context
 
@@ -18,10 +20,19 @@ class Pipeline(ABC):
     _teardown_steps: Optional[List[PipelineAction]] = None
 
     name: Optional[str] = None
+    """
+    The name of the pipeline.
+    """
+
+    config: Config
+    """
+    The configuration used by the pipeline.
+    """
 
     def __init__(
             self,
             name: Optional[str] = None,
+            config: Optional[Path|str|dict] = {},
             setup: Optional[List[PipelineAction]] = None,
             teardown: Optional[List[PipelineAction]] = None
         ):
@@ -34,6 +45,7 @@ class Pipeline(ABC):
             teardown (Optional[List[PipelineAction]]): The teardown steps to run after processing.
         """
         self.name = name
+        self.config = Config(config)
         self._setup_steps = setup
         self._teardown_steps = teardown
 

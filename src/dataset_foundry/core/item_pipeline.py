@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from typing import List, Optional
 
 from ..types.item_action import ItemAction
@@ -19,6 +20,7 @@ class ItemPipeline(Pipeline):
             self,
             steps: List[ItemAction],
             name: Optional[str] = None,
+            config: Optional[Path|str|dict] = {},
             setup: Optional[List[PipelineAction]] = None,
             teardown: Optional[List[PipelineAction]] = None
         ):
@@ -32,7 +34,7 @@ class ItemPipeline(Pipeline):
             teardown (Optional[List[PipelineAction]]): The steps to cleanup resources after
                 processing.
         """
-        super().__init__(name=name, setup=setup, teardown=teardown)
+        super().__init__(name=name, config=config, setup=setup, teardown=teardown)
         self._steps = steps
 
     async def execute(self, dataset: Optional[Dataset], context: Optional[Context]) -> None:
@@ -51,4 +53,9 @@ class ItemPipeline(Pipeline):
     async def process_data_item(self, item: Optional[DatasetItem], context: Optional[Context]):
         # TODO: Add error handling [twl 7.Feb.25]
         for action in self._steps:
-            await action(item, context)
+            try:
+                await action(item, context)
+            except Exception as e:
+                logger.error(f"Error during item pipeline {self.name} in step {action}: {e}")
+                raise e
+
