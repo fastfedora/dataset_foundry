@@ -54,9 +54,13 @@ class Context:
         self._params = params or {}
         self._dataset = dataset
 
+        # TODO: Scan `params` and `config` for any keys that match the attributes of this object,
+        #       (pipeline, config, params, dataset) and log a warning. [fastfedora 4.Mar.25]
+
     def __getitem__(self, key: str):
         """
-        Get the value from the context associated with `key`.
+        Get the value from the context associated with `key`. For this object, keys and attributes
+        are equivalent.
 
         If `key` is `pipeline`, `config`, `params` or `dataset`, returns the corresponding property
         of this context; otherwise, returns a value by searching the `params` and then the `config`
@@ -76,6 +80,23 @@ class Context:
             return self.config[key]
         else:
             raise KeyError(f"Key {key} not found in context")
+
+    def __getattr__(self, key: str):
+        """
+        Get the value from the context associated with `key`. For this object, keys and attributes
+        are equivalent.
+
+        If `key` is `pipeline`, `config`, `params` or `dataset`, returns the corresponding property
+        of this context; otherwise, returns a value by searching the `params` and then the `config`
+        for the given `key`.
+
+        Args:
+            key (str): The key to retrieve from the context.
+
+        Returns:
+            Any: The value associated with the given `key`.
+        """
+        return self[key]
 
     def __contains__(self, key: str) -> bool:
         """
