@@ -11,6 +11,16 @@ from dataset_foundry.core.template import Template
 pipeline = ItemPipeline(
     name="generate_spec",
     config=Path(__file__).parent / "config.yaml",
+    # TODO: Think about a way to specify the parameters a pipeline accepts [fastfedora 4.Mar.25]
+    # params={
+    #     "num_samples": {
+    #         "type": "int",
+    #         "default": 10,
+    #     },
+    # },
+    # metadata={
+    #     "version": 1,
+    # },
     setup=[
       generate_dataset(prompt=Key("context.prompts.generate_functions_and_classes")),
     ],

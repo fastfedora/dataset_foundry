@@ -18,6 +18,7 @@ pipeline = ItemPipeline(
     name="regenerate_unit_tests",
     config=Path(__file__).parent / "config.yaml",
     setup=[
+        # TODO: Can we make this conditional based on whether data items already exist? [fastfedora 28.Feb.25]
         load_dataset_from_directory(include="{id|[0-9]*}_{function_name}/info.yaml"),
         load_dataset_from_directory(
             include="{id|[0-9]*}_{function_name}/source.py",
