@@ -7,7 +7,6 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 
 from dataset_foundry.actions.dataset.load_dataset import load_dataset
-from dataset_foundry.actions.dataset.load_context import load_context
 from dataset_foundry.actions.item.generate_item import generate_item
 from dataset_foundry.actions.item.load_item import load_item
 from dataset_foundry.actions.item.save_item_chat import save_item_chat
@@ -48,8 +47,8 @@ def build_prompt(item: DatasetItem, context: Context):
 
 pipeline = ItemPipeline(
     name="generate_code_from_unit_tests",
+    config=Path(__file__).parent / "config.yaml",
     setup=[
-        load_context(dir=Path(__file__).parent, filename="config.yaml"),
         load_dataset(filename="specs.yaml", property="spec"),
     ],
     steps=[

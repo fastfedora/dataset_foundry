@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from dataset_foundry.actions.dataset.load_context import load_context
 from dataset_foundry.actions.dataset.load_dataset import load_dataset
 from dataset_foundry.actions.item.generate_item import generate_item
 from dataset_foundry.actions.item.save_item_chat import save_item_chat
@@ -13,8 +12,8 @@ from dataset_foundry.core.template import Template
 
 pipeline = ItemPipeline(
     name="generate_unit_tests_from_spec",
+    config=Path(__file__).parent / "config.yaml",
     setup=[
-        load_context(dir=Path(__file__).parent, filename="config.yaml"),
         load_dataset(filename="specs.yaml"),
     ],
     steps=[
