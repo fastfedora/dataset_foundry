@@ -109,7 +109,7 @@ async def main_cli():
     )
 
     pipeline_parameters = {}
-    parameter_list = args.pop("pipeline_parameters", [])
+    parameter_list = args.pop("pipeline_parameters", []) or []
     for param_dict in parameter_list:
         pipeline_parameters.update(param_dict)
 
