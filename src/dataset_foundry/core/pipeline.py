@@ -6,7 +6,6 @@ from typing import List, Optional, TypeAlias
 from ..types.dataset_action import DatasetAction
 from .config import Config
 from .dataset import Dataset
-from .context import Context
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +52,7 @@ class Pipeline(ABC):
             self,
             steps: List[PipelineAction],
             dataset: Dataset,
-            context: Context
+            context: 'Context', # type: ignore - avoid circular import
         ) -> Dataset:
         for step in steps:
             # TODO: Consider removing this in favor of `run_pipeline` [fastfedora 27.Feb.25]
@@ -68,22 +67,22 @@ class Pipeline(ABC):
     async def run(
             self,
             dataset: Optional[Dataset] = None,
-            context: Optional[Context] = None,
             args: Optional[dict] = None,
+            context: Optional['Context'] = None, # type: ignore - avoid circular import
         ) -> Dataset:
         """
         Run the pipeline.
 
         Args:
             dataset (Optional[Dataset]): The dataset to process.
-            context (Optional[Context]): The context to use for processing.
             args (Optional[dict]): The arguments to pass to the pipeline.
+            context (Optional[Context]): The parent context, if running within another pipeline.
         """
-        dataset = dataset if dataset else Dataset()
-        context = context if context else Context()
+        from .context import Context # avoid circular import
 
-        if args:
-            context.update(args)
+        dataset = dataset if dataset else Dataset()
+        context = context.create_child(self, dataset, args) if context \
+            else Context(self, dataset, args)
 
         if self.name:
             logger.info(f"Running pipeline: {self.name}")
@@ -94,7 +93,11 @@ class Pipeline(ABC):
 
         return dataset
 
-    async def setup(self, dataset: Optional[Dataset], context: Context) -> Dataset:
+    async def setup(
+            self,
+            dataset: Optional[Dataset],
+            context: 'Context', # type: ignore - avoid circular import
+        ) -> Dataset:
         """
         Setup the pipeline and prepare the dataset for processing.
 
@@ -110,7 +113,11 @@ class Pipeline(ABC):
             await self._do_steps(self._setup_steps, dataset, context)
 
     @abstractmethod
-    async def execute(self, dataset: Optional[Dataset], context: Optional[Context]) -> None:
+    async def execute(
+            self,
+            dataset: Optional[Dataset],
+            context: Optional['Context'], # type: ignore - avoid circular import
+        ) -> None:
         """
         Execute the data-processing steps of this pipeline.
 
@@ -120,7 +127,11 @@ class Pipeline(ABC):
         """
         pass
 
-    async def teardown(self, dataset: Optional[Dataset], context: Optional[Context]) -> None:
+    async def teardown(
+            self,
+            dataset: Optional[Dataset],
+            context: Optional['Context'], # type: ignore - avoid circular import
+        ) -> None:
         """
         Clean up any resources used by this pipeline and finalize the dataset.
 
