@@ -54,6 +54,14 @@ async def main_cli():
         help="Directory to output logs to (defaults to logs/<dataset>)"
     )
     parser.add_argument(
+        "--log-level",
+        type=str,
+        env="DF_LOG_LEVEL",
+        default="info",
+        choices=["debug", "info", "warning", "error", "critical"],
+        help="Set the log level (debug, info, warning, error, critical)"
+    )
+    parser.add_argument(
         "--num-samples",
         type=int,
         env="DF_NUM_SAMPLES",
@@ -74,15 +82,15 @@ async def main_cli():
         default=DEFAULT_MODEL_TEMPERATURE,
         help=f"Temperature for generation (default: {DEFAULT_MODEL_TEMPERATURE})"
     )
+    args = vars(parser.parse_args())
 
     logging.basicConfig(
-        level=logging.INFO,
+        level=getattr(logging, args["log_level"].upper()),
         # format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         format='%(levelname)s: %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 
-    args = vars(parser.parse_args())
     args["input_dir"] = parse_dir_arg(args["input_dir"], DATASET_DIR / args["dataset"], False)
     args["output_dir"] = parse_dir_arg(args["output_dir"], DATASET_DIR / args["dataset"], True)
     args["config_dir"] = parse_dir_arg(args["config_dir"], Path(args["pipeline"]).parent, False)
