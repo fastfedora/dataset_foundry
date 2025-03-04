@@ -77,6 +77,19 @@ class Context:
         else:
             raise KeyError(f"Key {key} not found in context")
 
+    def __contains__(self, key: str) -> bool:
+        """
+        Check if the context contains a key.
+
+        Args:
+            key (str): The key to check for in the context.
+
+        Returns:
+            bool: True if the key is in the context, False otherwise.
+        """
+        return key in ["pipeline", "config", "params", "dataset"] or \
+            key in self.params or key in self.config
+
     def create_child(
             self,
             pipeline: Optional[Pipeline] = None,
