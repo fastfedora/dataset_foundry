@@ -9,7 +9,7 @@ from ...utils.save_messages import save_messages
 from ...utils.format.format_template import format_template
 
 def save_item_chat(
-        dir: Union[Callable,Key,str] = Key("log_dir"),
+        dir: Union[Callable,Key,str] = Key("context.log_dir"),
         filename: Union[Callable,Key,str] = "log.yaml",
     ) -> ItemAction:
     async def save_item_chat_action(item: DatasetItem, context: Context):

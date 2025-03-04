@@ -15,8 +15,8 @@ def build_prompt(user: str, variables: dict):
     return prompt_template.partial(**variables)
 
 def generate_item(
-        prompt: Union[Callable,Key,str] = Key("prompt"),
-        model: Union[Callable,Key,str] = Key("model"),
+        prompt: Union[Callable,Key,str] = Key("context.prompt"),
+        model: Union[Callable,Key,str] = Key("context.model"),
     ) -> ItemAction:
     async def generate_item_action(item: DatasetItem, context: Context):
         resolved_prompt = resolve_item_value(prompt, item, context, required_as="prompt")

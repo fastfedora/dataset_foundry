@@ -16,8 +16,8 @@ variable_regex = r'\{([^}]+)\}'
 logger = logging.getLogger(__name__)
 
 def generate_dataset(
-        prompt: Union[Callable,Key,str] = Key("prompt"),
-        model: Union[Callable,Key,str] = Key("model"),
+        prompt: Union[Callable,Key,str] = Key("context.prompt"),
+        model: Union[Callable,Key,str] = Key("context.model"),
         parser: Optional[Union[Callable,Key,str]] = None,
         output_key: Optional[Union[Callable,Key,str]] = None,
     ) -> DatasetAction:

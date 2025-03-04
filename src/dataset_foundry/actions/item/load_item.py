@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def load_item(
         filename: Union[Callable,Key,str],
-        dir: Union[Callable,Key,str] = Key("input_dir"),
+        dir: Union[Callable,Key,str] = Key("context.input_dir"),
         property: Union[Callable,Key,str] = None,
         format: Optional[Union[Callable,Literal['auto', 'text', 'json', 'yaml']]] = 'auto',
     ) -> ItemAction:

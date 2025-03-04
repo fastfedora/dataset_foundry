@@ -12,7 +12,7 @@ from ...utils.parse.extract_xml_block import extract_xml_block
 def parse_item(
         input: Optional[Union[Callable,Key,str]] = Key("output"),
         output_key: Optional[Union[Callable,Key,str]] = None,
-        parser: Optional[Union[Callable,Key,str]] = Key("parser"),
+        parser: Optional[Union[Callable,Key,str]] = Key("context.parser"),
         code_block: Optional[Union[Callable,Key,str]] = None,
         xml_block: Optional[Union[Callable,Key,str]] = None,
     ) -> ItemAction:

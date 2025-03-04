@@ -12,7 +12,7 @@ from ...utils.format.format_template import format_template
 def save_item(
         filename: Union[Callable,Key,str],
         contents: Optional[Union[Callable,Key,str]] = None,
-        dir: Union[Callable,Key,str] = Key("output_dir"),
+        dir: Union[Callable,Key,str] = Key("context.output_dir"),
         format: Optional[Union[Callable,Literal['auto', 'text', 'json', 'yaml']]] = 'auto',
     ) -> ItemAction:
 

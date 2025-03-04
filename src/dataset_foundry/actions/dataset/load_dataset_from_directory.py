@@ -14,7 +14,7 @@ from ...utils.find_files import find_files
 logger = logging.getLogger(__name__)
 
 def load_dataset_from_directory(
-        dir: Union[Callable,Key,str] = Key("input_dir"),
+        dir: Union[Callable,Key,str] = Key("context.input_dir"),
         include: Union[Callable,Key,str] = "*",
         exclude: Union[Callable,Key,str] = None,
         property: Union[Callable,Key,str] = None,

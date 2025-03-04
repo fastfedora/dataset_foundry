@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 # TODO: Rename this `load_dataset_from_file`
 def load_dataset(
         filename: Union[Callable,Key,str] = "dataset.yaml",
-        dir: Union[Callable,Key,str] = Key("input_dir"),
+        dir: Union[Callable,Key,str] = Key("context.input_dir"),
         property: Union[Callable,Key,str] = None,
     ) -> DatasetAction:
     async def load_dataset_action(dataset: Dataset, context: Context):

@@ -10,7 +10,7 @@ from ...utils.format.format_template import format_template
 
 def run_unit_tests(
         filename: Union[Callable,Key,str],
-        dir: Union[Callable,Key,str] = Key("input_dir"),
+        dir: Union[Callable,Key,str] = Key("context.input_dir"),
         property: Union[Callable,Key,str] = "test_result",
     ) -> ItemAction:
     async def run_unit_tests_action(item: DatasetItem, context: Context):
