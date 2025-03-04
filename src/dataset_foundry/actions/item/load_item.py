@@ -8,7 +8,6 @@ from ...core.dataset_item import DatasetItem
 from ...core.key import Key
 from ...types.item_action import ItemAction
 from ...utils.params.resolve_item_value import resolve_item_value
-from ...utils.format.format_template import format_template
 
 logger = logging.getLogger(__name__)
 
