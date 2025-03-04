@@ -12,7 +12,7 @@ pipeline = ItemPipeline(
     name="generate_spec",
     config=Path(__file__).parent / "config.yaml",
     setup=[
-      generate_dataset(prompt=Key("prompts.generate_functions_and_classes")),
+      generate_dataset(prompt=Key("context.prompts.generate_functions_and_classes")),
     ],
     steps=[
       log_item(message=Template("Generating spec for {id}...")),

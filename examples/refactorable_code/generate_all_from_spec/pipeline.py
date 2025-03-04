@@ -23,7 +23,7 @@ pipeline = ItemPipeline(
         set_item_property(key="folder", value=Template("{id}_{spec.name}")),
         set_item_property(key="source", value="source.py"),
         set_item_property(key="test", value="test.py"),
-        generate_item(prompt=Key("prompts.generate_functions_and_classes")),
+        generate_item(prompt=Key("context.prompts.generate_functions_and_classes")),
         save_item_chat(filename=Template("chat_generate_all_from_spec_{id}.yaml")),
         parse_item(xml_block="code", output_key="code"),
         parse_item(xml_block="unit_tests", output_key="unit_tests"),

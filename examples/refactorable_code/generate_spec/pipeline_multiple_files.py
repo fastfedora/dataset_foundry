@@ -17,7 +17,7 @@ pipeline = ItemPipeline(
     config=Path(__file__).parent / "config.yaml",
     setup=[
         generate_dataset(
-            prompt=Key("prompts.generate"),
+            prompt=Key("context.prompts.generate"),
             parser=(lambda _content, _context: output_parser),
         ),
     ],

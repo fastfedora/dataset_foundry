@@ -10,7 +10,7 @@ pipeline = ItemPipeline(
     name="generate_spec_functions",
     config=Path(__file__).parent / "config.yaml",
     setup=[
-      generate_dataset(prompt=Key("prompts.generate_functions")),
+      generate_dataset(prompt=Key("context.prompts.generate_functions")),
     ],
     steps=[
       parse_item(code_block="yaml", output_key="specs"),

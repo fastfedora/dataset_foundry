@@ -42,7 +42,7 @@ pipeline = ItemPipeline(
             if_item("item.data['unit_tests_pass'] != 'true'", [
                 log_item(message=Template("Regenerating unit tests for {id}...")),
                 log_item(properties=['original_result.stdout']),
-                generate_item(prompt=Key("prompts.regenerate_unit_tests")),
+                generate_item(prompt=Key("context.prompts.regenerate_unit_tests")),
                 save_item_chat(filename=Template("chat_{id}_regenerate_unit_tests.yaml")),
                 parse_item(code_block="python", output_key="unit_tests"),
                 save_item(
