@@ -82,6 +82,14 @@ async def main_cli():
         default=DEFAULT_MODEL_TEMPERATURE,
         help=f"Temperature for generation (default: {DEFAULT_MODEL_TEMPERATURE})"
     )
+    parser.add_argument(
+        "-P",
+        action="append",
+        type=lambda x: dict(item.split("=") for item in x.split(",") if "=" in item),
+        dest="pipeline_parameters",
+        help="Pipeline parameters in the format 'key=value'. Can be specified multiple times."
+    )
+
     args = vars(parser.parse_args())
 
     logging.basicConfig(
@@ -100,10 +108,15 @@ async def main_cli():
         temperature=args["temperature"]
     )
 
+    pipeline_parameters = {}
+    parameter_list = args.pop("pipeline_parameters", [])
+    for param_dict in parameter_list:
+        pipeline_parameters.update(param_dict)
+
     module = import_module(args["pipeline"])
 
     logger.info(f"Loaded pipeline: {args['pipeline']}")
-    await module.pipeline.run(params=args)
+    await module.pipeline.run(params={ **args, **pipeline_parameters })
 
 def main():
     asyncio.run(main_cli())
