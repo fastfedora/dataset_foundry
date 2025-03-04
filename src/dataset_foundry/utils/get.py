@@ -32,6 +32,7 @@ def get(obj: Any, path: Union[str, Sequence[str]], default: Any = None) -> Any:
     try:
         return reduce(lambda d, key: getattr(d, key, None) if hasattr(d, key)
                      else d.get(key) if hasattr(d, 'get')
+                     else d[key] if hasattr(d, '__getitem__') and key in d
                      else None, path, obj)
     except (AttributeError, KeyError, TypeError):
         return default
