@@ -47,15 +47,15 @@ class ItemPipeline(Pipeline):
         """
         logger.info(f"Processing {len(dataset.items)} dataset items")
         for item in dataset.items:
-            # TODO: Add error handling [twl 7.Feb.25]
             await self.process_data_item(item, context)
 
     async def process_data_item(self, item: Optional[DatasetItem], context: Optional[Context]):
-        # TODO: Add error handling [twl 7.Feb.25]
         for action in self._steps:
             try:
                 await action(item, context)
             except Exception as e:
-                logger.error(f"Error during item pipeline {self.name} in step {action}: {e}")
+                logger.error(
+                    f"Error during item pipeline {self.name} in step {action.__name__}"
+                    f" processing item {item.id}: {e}"
+                )
                 raise e
-

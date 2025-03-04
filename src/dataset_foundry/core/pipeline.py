@@ -59,8 +59,11 @@ class Pipeline(ABC):
             if isinstance(step, Pipeline):
                 dataset = await step.run(dataset, context)
             else:
-                # TODO: Add error handling [twl 7.Feb.25]
-                await step(dataset, context)
+                try:
+                    await step(dataset, context)
+                except Exception as e:
+                    logger.error(f"Error during pipeline {self.name} in step {step.__name__}: {e}")
+                    raise e
 
         return dataset
 
