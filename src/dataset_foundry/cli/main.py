@@ -95,7 +95,7 @@ async def main_cli():
     module = import_module(args["pipeline"])
 
     logger.info(f"Loaded pipeline: {args['pipeline']}")
-    await module.pipeline.run(args=args)
+    await module.pipeline.run(params=args)
 
 def main():
     asyncio.run(main_cli())

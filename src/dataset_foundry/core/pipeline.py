@@ -67,22 +67,22 @@ class Pipeline(ABC):
     async def run(
             self,
             dataset: Optional[Dataset] = None,
-            args: Optional[dict] = None,
             context: Optional['Context'] = None, # type: ignore - avoid circular import
+            params: Optional[dict] = None,
         ) -> Dataset:
         """
         Run the pipeline.
 
         Args:
             dataset (Optional[Dataset]): The dataset to process.
-            args (Optional[dict]): The arguments to pass to the pipeline.
             context (Optional[Context]): The parent context, if running within another pipeline.
+            params (Optional[dict]): The parameters to pass to the pipeline.
         """
         from .context import Context # avoid circular import
 
         dataset = dataset if dataset else Dataset()
-        context = context.create_child(self, dataset, args) if context \
-            else Context(self, dataset, args)
+        context = context.create_child(self, dataset, params) if context \
+            else Context(self, dataset, params)
 
         if self.name:
             logger.info(f"Running pipeline: {self.name}")
