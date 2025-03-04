@@ -41,8 +41,10 @@ pipeline = ItemPipeline(
             ]),
             if_item("item.data['unit_tests_pass'] != 'true'", [
                 log_item(message=Template("Regenerating unit tests for {id}...")),
-                log_item(properties=['original_result.stdout']),
                 generate_item(prompt=Key("context.prompts.regenerate_unit_tests")),
+                if_item("context.log_level == 'debug'", [
+                    log_item(properties=['original_result.stdout']),
+                ]),
                 save_item_chat(filename=Template("chat_{id}_regenerate_unit_tests.yaml")),
                 parse_item(code_block="python", output_key="unit_tests"),
                 save_item(
@@ -54,7 +56,7 @@ pipeline = ItemPipeline(
                     property="updated_result"
                 ),
                 log_item(properties=['updated_result']),
-                if_item("not item.data['updated_result'].success", [
+                if_item("context.log_level == 'debug' and not item.data['updated_result'].success", [
                     log_item(properties=['updated_result.stdout']),
                 ]),
                 if_item("item.data['updated_result'].num_passed > item.data['original_result'].num_passed", [
