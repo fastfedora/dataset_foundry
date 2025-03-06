@@ -3,6 +3,7 @@ import logging
 from ...core.context import Context
 from ...core.dataset_item import DatasetItem
 from ...types.item_action import ItemAction
+from ...utils.eval.item_eval import item_eval
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ def while_item(condition: str, actions: list, max_iterations: int = 10) -> ItemA
 
         # TODO: Think about whether we want to bind `**item.data` here to make things simpler. I
         #       think other item actions are doing this [fastfedora 3.Mar.2025]
-        while eval(condition, {}, {'item': item, 'context': context, 'iteration': iterations}):
+        while item_eval(condition, item, context, { 'iteration': iterations }):
             logger.debug(f"Condition '{condition}' met. Executing loop {iterations + 1}.")
             for action in actions:
                 await action(item, context)

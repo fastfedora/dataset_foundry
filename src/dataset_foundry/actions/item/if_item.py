@@ -1,8 +1,8 @@
 import logging
-
 from ...core.context import Context
 from ...core.dataset_item import DatasetItem
 from ...types.item_action import ItemAction
+from ...utils.eval.item_eval import item_eval
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ def if_item(condition: str, actions: list) -> ItemAction:
             condition is true.
     """
     async def if_item_action(item: DatasetItem, context: Context):
-        if eval(condition, {}, {'item': item, 'context': context}):
+        if item_eval(condition, item, context):
             logger.debug(f"Condition '{condition}' met. Executing actions.")
             for action in actions:
                 await action(item, context)
