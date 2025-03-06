@@ -25,7 +25,7 @@ def save_item(
         if resolved_format == 'json':
             resolved_contents = json.dumps(resolved_contents, indent=2)
         elif resolved_format == 'yaml':
-            resolved_contents = yaml.dump(resolved_contents)
+            resolved_contents = yaml.dump(resolved_contents, sort_keys=False)
         else:
             resolved_contents = str(resolved_contents)
 
