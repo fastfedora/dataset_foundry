@@ -19,11 +19,11 @@ pipeline = ItemPipeline(
     ],
     steps=[
         set_item_property(key="status", value="not-done"),
-        while_item("item.data['status'] != 'done' and iteration < 2", [
+        while_item("status != 'done' and iteration < 2", [
             do_item_steps(pipeline=f"{root_module}.generate_all_from_spec.pipeline"),
             set_item_property(key="function_name", value=Template("{spec.name}")),
             do_item_steps(pipeline=f"{root_module}.regenerate_unit_tests.pipeline"),
-            if_item("item.data['unit_tests_pass'] == 'true'", [
+            if_item("unit_tests_pass == 'true'", [
                 set_item_property(key="status", value="done"),
             ]),
         ]),

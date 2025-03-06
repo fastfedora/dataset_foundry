@@ -34,13 +34,13 @@ pipeline = ItemPipeline(
     steps=[
         set_item_property(key="folder", value=Template("{id}_{function_name}")),
         set_item_property(key="unit_tests_pass", value="false"),
-        while_item("item.data['unit_tests_pass'] != 'true' and iteration < 2", [
+        while_item("unit_tests_pass != 'true' and iteration < 2", [
             run_unit_tests(filename=Template("{folder}/test.py"), property="original_result"),
             log_item(properties=['original_result']),
-            if_item("item.data['original_result'].success", [
+            if_item("original_result.success", [
                 set_item_property(key="unit_tests_pass", value="true"),
             ]),
-            if_item("item.data['unit_tests_pass'] != 'true'", [
+            if_item("unit_tests_pass != 'true'", [
                 log_item(message=Template("Regenerating unit tests for {id}...")),
                 generate_item(prompt=Key("context.prompts.regenerate_unit_tests")),
                 if_item("context.log_level == 'debug'", [
@@ -57,15 +57,15 @@ pipeline = ItemPipeline(
                     property="updated_result"
                 ),
                 log_item(properties=['updated_result']),
-                if_item("context.log_level == 'debug' and not item.data['updated_result'].success", [
+                if_item("context.log_level == 'debug' and not updated_result.success", [
                     log_item(properties=['updated_result.stdout']),
                 ]),
-                if_item("item.data['updated_result'].num_passed > item.data['original_result'].num_passed", [
+                if_item("updated_result.num_passed > original_result.num_passed", [
                     save_item(
                         contents=(lambda item: item.data["unit_tests"]),
                         filename=Template("{folder}/test.py")
                     ),
-                    if_item("item.data['updated_result'].success", [
+                    if_item("updated_result.success", [
                         set_item_property(key="unit_tests_pass", value="true"),
                     ]),
                 ]),

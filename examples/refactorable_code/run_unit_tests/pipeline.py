@@ -13,7 +13,7 @@ pipeline = ItemPipeline(
     steps=[
         run_unit_tests(filename=Template("{id}_{function_name}/test.py")),
         log_item(properties=['test_result']),
-        if_item("context.log_level == 'debug' and not item.data['test_result'].success", [
+        if_item("context.log_level == 'debug' and not test_result.success", [
             log_item(properties=['test_result.stdout']),
         ])
     ]
