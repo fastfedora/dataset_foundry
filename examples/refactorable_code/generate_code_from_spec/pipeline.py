@@ -9,6 +9,7 @@ from langchain_core.output_parsers import PydanticOutputParser
 from dataset_foundry.actions.dataset.load_dataset import load_dataset
 from dataset_foundry.actions.item.generate_item import generate_item
 from dataset_foundry.actions.item.save_item_chat import save_item_chat
+from dataset_foundry.actions.item.set_item_metadata import set_item_metadata
 from dataset_foundry.actions.item.set_item_property import set_item_property
 from dataset_foundry.actions.item.parse_item import parse_item
 from dataset_foundry.actions.item.save_item import save_item
@@ -59,6 +60,7 @@ pipeline = ItemPipeline(
     steps=[
         set_item_property(key="folder", value=Template("{id}_{spec.name}")),
         set_item_property(key="source", value="source.py"),
+        set_item_metadata(),
         generate_item(prompt=build_prompt),
         save_item_chat(filename=Template("chat_{id}_generate_code_from_spec.yaml")),
         parse_item(code_block="json"),
@@ -66,6 +68,7 @@ pipeline = ItemPipeline(
         save_item(
             contents=(lambda item: {
                 'id': item.id,
+                'metadata': item.data['metadata'],
                 'name': item.data['spec']['name'],
                 'language': item.data['spec']['language'],
                 **pick(['spec', 'source', 'test'], item.data),

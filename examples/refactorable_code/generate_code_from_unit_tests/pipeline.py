@@ -12,6 +12,7 @@ from dataset_foundry.actions.item.load_item import load_item
 from dataset_foundry.actions.item.save_item_chat import save_item_chat
 from dataset_foundry.actions.item.parse_item import parse_item
 from dataset_foundry.actions.item.save_item import save_item
+from dataset_foundry.actions.item.set_item_metadata import set_item_metadata
 from dataset_foundry.actions.item.set_item_property import set_item_property
 from dataset_foundry.core.context import Context
 from dataset_foundry.core.dataset_item import DatasetItem
@@ -60,6 +61,7 @@ pipeline = ItemPipeline(
         set_item_property(key="folder", value=Template("{id}_{spec.name}")),
         set_item_property(key="source", value="source.py"),
         set_item_property(key="test", value="test.py"),
+        set_item_metadata(),
         load_item(filename=Template("{folder}/{test}"), property="unit_tests"),
         generate_item(prompt=build_prompt),
         save_item_chat(filename=Template("chat_{id}_code_from_unit_tests.yaml")),
@@ -68,6 +70,7 @@ pipeline = ItemPipeline(
         save_item(
             contents=(lambda item: {
                 'id': item.id,
+                'metadata': item.data['metadata'],
                 'name': item.data['spec']['name'],
                 'language': item.data['spec']['language'],
                 **pick(['spec', 'source', 'test'], item.data),
