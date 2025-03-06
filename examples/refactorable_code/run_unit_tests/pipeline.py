@@ -2,6 +2,7 @@ from dataset_foundry.actions.dataset.load_dataset_from_directory import load_dat
 from dataset_foundry.actions.item.if_item import if_item
 from dataset_foundry.actions.item.log_item import log_item
 from dataset_foundry.actions.item.run_unit_tests import run_unit_tests
+from dataset_foundry.actions.item.set_item_property import set_item_property
 from dataset_foundry.core.item_pipeline import ItemPipeline
 from dataset_foundry.core.template import Template
 
@@ -17,6 +18,9 @@ pipeline = ItemPipeline(
     steps=[
         run_unit_tests(filename=Template("{id}_{function_name}/test.py")),
         log_item(properties=['test_result']),
+        if_item("test_result.success", [
+            set_item_property(key="unit_tests_pass", value="true"),
+        ]),
         if_item("context.log_level == 'debug' and not test_result.success", [
             log_item(properties=['test_result.stdout']),
         ])
