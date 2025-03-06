@@ -8,14 +8,14 @@ class Template:
     referenced using dotted notation (e.g. `{item.data.name}`) and have custom formatters applied
     (e.g. `{item.data|yaml}`).
     """
-    _text: str
+    _value: str
 
     @property
-    def text(self) -> str:
-        return self._text
+    def value(self) -> str:
+        return self._value
 
-    def __init__(self, text: str):
-        self._text = text
+    def __init__(self, value: str):
+        self._value = value
 
     def resolve(
             self,
@@ -34,4 +34,4 @@ class Template:
         Returns:
             str: The template with variables replaced with their corresponding values.
         """
-        return format_template(self.text, variables, formatters)
+        return format_template(self.value, variables, formatters)
