@@ -19,6 +19,7 @@ class DatasetPipeline(Pipeline):
             steps: List[PipelineAction],
             name: Optional[str] = None,
             config: Optional[Path|str|dict] = {},
+            metadata: Optional[dict] = {},
             setup: Optional[List[PipelineAction]] = None,
             teardown: Optional[List[PipelineAction]] = None
         ):
@@ -26,13 +27,21 @@ class DatasetPipeline(Pipeline):
         Initialize the item pipeline.
 
         Args:
-            name (str): The name of the pipeline.
             steps (List[PipelineAction]): The steps to execute on each item.
+            name (str): The name of the pipeline.
+            config (Path|str|dict): The configuration, or path to a config file, for the pipeline.
+            metadata (dict): Metadata about the pipeline.
             setup (Optional[List[PipelineAction]]): The steps to setup the dataset before processing
             teardown (Optional[List[PipelineAction]]): The steps to cleanup resources after
                 processing.
         """
-        super().__init__(name=name, config=config, setup=setup, teardown=teardown)
+        super().__init__(
+            name=name,
+            config=config,
+            metadata=metadata,
+            setup=setup,
+            teardown=teardown
+        )
         self._steps = steps
 
     async def execute(self, dataset: Optional[Dataset], context: Optional[Context]) -> None:

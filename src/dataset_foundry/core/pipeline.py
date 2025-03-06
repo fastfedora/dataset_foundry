@@ -23,6 +23,11 @@ class Pipeline(ABC):
     The name of the pipeline.
     """
 
+    metadata: dict = {}
+    """
+    Metadata about the pipeline.
+    """
+
     config: Config
     """
     The configuration used by the pipeline.
@@ -32,6 +37,7 @@ class Pipeline(ABC):
             self,
             name: Optional[str] = None,
             config: Optional[Path|str|dict] = {},
+            metadata: Optional[dict] = {},
             setup: Optional[List[PipelineAction]] = None,
             teardown: Optional[List[PipelineAction]] = None
         ):
@@ -40,11 +46,14 @@ class Pipeline(ABC):
 
         Args:
             name (Optional[str]): The name of the pipeline.
+            config (Path|str|dict): The configuration, or path to a config file, for the pipeline.
+            metadata (dict): Metadata about the pipeline.
             setup (Optional[List[PipelineAction]]): The setup steps to run before processing.
             teardown (Optional[List[PipelineAction]]): The teardown steps to run after processing.
         """
         self.name = name
         self.config = Config(config)
+        self.metadata = metadata
         self._setup_steps = setup
         self._teardown_steps = teardown
 
