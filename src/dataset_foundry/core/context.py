@@ -12,6 +12,7 @@ class Context:
     _pipeline: Pipeline
     _params: dict
     _dataset: Dataset
+    _parent: Optional['Context'] = None
 
     @property
     def pipeline(self) -> Pipeline:
@@ -40,6 +41,13 @@ class Context:
         The dataset that is being processed by the pipeline.
         """
         return self._dataset
+
+    @property
+    def parent(self) -> 'Context':
+        """
+        The parent context of this context.
+        """
+        return self._parent
 
     def __init__(self, pipeline: Pipeline, dataset: Dataset, params: Optional[dict] = None):
         """
@@ -131,4 +139,7 @@ class Context:
         if merge_params:
             params = {**self.params, **(params or {})}
 
-        return Context(pipeline or self.pipeline, dataset or self.dataset, params)
+        context = Context(pipeline or self.pipeline, dataset or self.dataset, params)
+        context._parent = self
+
+        return context
