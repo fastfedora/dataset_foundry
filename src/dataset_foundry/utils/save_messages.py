@@ -20,13 +20,20 @@ def wrap_text(text: str, max_characters: int = 100) -> str:
     """Wrap text at 100 characters, preserving existing line breaks."""
     # Split text into lines; we'll add the linefeed back in below to preserve paragraph breaks
     lines = text.split('\n')
+
     # Wrap each line individually
     wrapped_lines = []
+
     for line in lines:
+        # PyYAML silently uses quoted style if the text has any tab characters or newlines with
+        # whitespace before them, since YAML can't represent these in block literals. But for the
+        # messages, we don't care about these two cases, so we remove/convert them.
+        line = line.rstrip().replace("\t"," " * 4)
         if len(line) > max_characters:
             wrapped_lines.extend(textwrap.wrap(line, width=max_characters))
         else:
             wrapped_lines.append(line)
+
     return '\n'.join(wrapped_lines)
 
 def should_use_literal_block(text: str) -> bool:
