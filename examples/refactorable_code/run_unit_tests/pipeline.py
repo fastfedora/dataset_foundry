@@ -20,9 +20,11 @@ pipeline = ItemPipeline(
         log_item(properties=['test_result']),
         if_item("test_result.success", [
             set_item_property(key="unit_tests_pass", value="true"),
+        ], [
+            set_item_property(key="unit_tests_pass", value="false"),
+            if_item("context.log_level == 'debug'", [
+                log_item(properties=['test_result.stdout']),
+            ]),
         ]),
-        if_item("context.log_level == 'debug' and not test_result.success", [
-            log_item(properties=['test_result.stdout']),
-        ])
     ]
 )
