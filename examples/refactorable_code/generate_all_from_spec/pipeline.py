@@ -14,6 +14,11 @@ from dataset_foundry.utils.collections.pick import pick
 
 pipeline = ItemPipeline(
     name="generate_all_from_spec",
+    metadata={
+        "version": "0.1.0",
+        "author": "fastfedora",
+        "description": "Generate refactorable code + unit tests from a spec",
+    },
     config=Path(__file__).parent / "config.yaml",
     setup=[
         load_dataset(filename="specs.yaml", property="spec"),

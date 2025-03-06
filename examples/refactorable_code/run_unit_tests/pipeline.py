@@ -7,6 +7,10 @@ from dataset_foundry.core.template import Template
 
 pipeline = ItemPipeline(
     name="run_unit_tests",
+    metadata={
+        "version": "0.1.0",
+        "author": "fastfedora",
+    },
     setup=[
         load_dataset_from_directory(include="{id|[0-9]*}_{function_name}/info.yaml"),
     ],

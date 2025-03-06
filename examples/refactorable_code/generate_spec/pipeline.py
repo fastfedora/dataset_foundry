@@ -10,6 +10,11 @@ from dataset_foundry.core.template import Template
 
 pipeline = ItemPipeline(
     name="generate_spec",
+    metadata={
+        "version": "0.1.0",
+        "author": "fastfedora",
+        "description": "Generate a spec for refactorable code using both functions and classes",
+    },
     config=Path(__file__).parent / "config.yaml",
     # TODO: Think about a way to specify the parameters a pipeline accepts [fastfedora 4.Mar.25]
     # params={

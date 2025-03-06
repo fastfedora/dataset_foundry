@@ -14,6 +14,11 @@ def output_parser(content):
 
 pipeline = ItemPipeline(
     name="generate_spec_multiple_files",
+    metadata={
+        "version": "0.1.0",
+        "author": "fastfedora",
+        "description": "Generate a spec for refactorable code",
+    },
     config=Path(__file__).parent / "config.yaml",
     setup=[
         generate_dataset(

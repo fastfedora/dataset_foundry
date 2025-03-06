@@ -16,6 +16,11 @@ from dataset_foundry.core.item_pipeline import ItemPipeline
 
 pipeline = ItemPipeline(
     name="regenerate_unit_tests",
+    metadata={
+        "version": "0.1.0",
+        "author": "fastfedora",
+        "description": "Regenerate unit tests until they pass or the retry limit is reached",
+    },
     config=Path(__file__).parent / "config.yaml",
     setup=[
         # TODO: Can we make this conditional based on whether data items already exist? [fastfedora 28.Feb.25]

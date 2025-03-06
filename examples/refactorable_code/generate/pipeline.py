@@ -12,6 +12,11 @@ root_module = "examples.refactorable_code"
 
 pipeline = ItemPipeline(
     name="generate_refactorable_code",
+    metadata={
+        "version": "0.1.0",
+        "author": "fastfedora",
+        "description": "Generate refactorable code using spec -> code + unit tests",
+     },
     setup=[
         run_pipeline(pipeline=f"{root_module}.generate_spec.pipeline"),
         reset_dataset(), # `generate_spec` creates one item per spec file, not one per sample

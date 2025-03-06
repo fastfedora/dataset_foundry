@@ -12,6 +12,11 @@ from dataset_foundry.core.template import Template
 
 pipeline = ItemPipeline(
     name="generate_unit_tests_from_spec",
+    metadata={
+        "version": "0.1.0",
+        "author": "fastfedora",
+        "description": "Generate unit tests from a spec",
+    },
     config=Path(__file__).parent / "config.yaml",
     setup=[
         load_dataset(filename="specs.yaml"),

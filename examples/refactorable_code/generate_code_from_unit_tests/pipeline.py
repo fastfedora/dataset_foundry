@@ -47,6 +47,11 @@ def build_prompt(item: DatasetItem, context: Context):
 
 pipeline = ItemPipeline(
     name="generate_code_from_unit_tests",
+    metadata={
+        "version": "0.1.0",
+        "author": "fastfedora",
+        "description": "Generate code from unit tests",
+    },
     config=Path(__file__).parent / "config.yaml",
     setup=[
         load_dataset(filename="specs.yaml", property="spec"),
