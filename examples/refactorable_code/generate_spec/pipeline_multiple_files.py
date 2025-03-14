@@ -22,7 +22,7 @@ pipeline = ItemPipeline(
     config=Path(__file__).parent / "config.yaml",
     setup=[
         generate_dataset(
-            prompt=Key("context.prompts.generate"),
+            prompt=Key("context.prompts.generate_functions_and_classes"),
             parser=(lambda _content, _context: output_parser),
         ),
     ],
