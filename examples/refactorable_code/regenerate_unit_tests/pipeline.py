@@ -24,23 +24,14 @@ pipeline = ItemPipeline(
     config=Path(__file__).parent / "config.yaml",
     setup=[
         # TODO: Can we make this conditional based on whether data items already exist? [fastfedora 28.Feb.25]
-        load_dataset_from_directory(include="{id|[0-9]*}_{function_name}/info.yaml"),
-        load_dataset_from_directory(
-            include="{id|[0-9]*}_{function_name}/source.py",
-            property="code",
-            merge=True,
-        ),
-        load_dataset_from_directory(
-            include="{id|[0-9]*}_{function_name}/test.py",
-            property="unit_tests",
-            merge=True,
-        ),
+        load_dataset_from_directory(include="{id}/info.yaml"),
+        load_dataset_from_directory(include="{id}/source.py", property="code", merge=True),
+        load_dataset_from_directory(include="{id}/test.py", property="unit_tests", merge=True),
     ],
     steps=[
-        set_item_property(key="folder", value=Template("{id}_{function_name}")),
         set_item_property(key="unit_tests_pass", value="false"),
         while_item("unit_tests_pass != 'true' and iteration < 2", [
-            run_unit_tests(filename=Template("{folder}/test.py"), property="original_result"),
+            run_unit_tests(filename=Template("{id}/test.py"), property="original_result"),
             log_item(properties=['original_result']),
             if_item("original_result.success", [
                 set_item_property(key="unit_tests_pass", value="true"),
@@ -55,10 +46,10 @@ pipeline = ItemPipeline(
                 parse_item(code_block="python", output_key="unit_tests"),
                 save_item(
                     contents=(lambda item: item.data["unit_tests"]),
-                    filename=Template("{folder}/test_updated.py"),
+                    filename=Template("{id}/test_updated.py"),
                 ),
                 run_unit_tests(
-                    filename=Template("{folder}/test_updated.py"),
+                    filename=Template("{id}/test_updated.py"),
                     property="updated_result"
                 ),
                 log_item(properties=['updated_result']),
@@ -68,7 +59,7 @@ pipeline = ItemPipeline(
                 if_item("updated_result.num_passed > original_result.num_passed", [
                     save_item(
                         contents=(lambda item: item.data["unit_tests"]),
-                        filename=Template("{folder}/test.py")
+                        filename=Template("{id}/test.py")
                     ),
                     if_item("updated_result.success", [
                         set_item_property(key="unit_tests_pass", value="true"),

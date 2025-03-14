@@ -27,6 +27,6 @@ pipeline = ItemPipeline(
         ),
     ],
     steps=[
-        save_item(filename=Template("spec_{id}.yaml"), format="yaml")
+        save_item(filename=Template("spec_{id}_{name}.yaml"), format="yaml")
     ]
 )

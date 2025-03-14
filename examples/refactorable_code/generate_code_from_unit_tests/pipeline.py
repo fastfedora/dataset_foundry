@@ -55,18 +55,21 @@ pipeline = ItemPipeline(
     },
     config=Path(__file__).parent / "config.yaml",
     setup=[
-        load_dataset(filename="specs.yaml", property="spec"),
+        load_dataset(
+            filename="specs.yaml",
+            property="spec",
+            id_generator=lambda index, data: f"{index+1:03d}_{data['name']}",
+        ),
     ],
     steps=[
-        set_item_property(key="folder", value=Template("{id}_{spec.name}")),
         set_item_property(key="source", value="source.py"),
         set_item_property(key="test", value="test.py"),
         set_item_metadata(),
-        load_item(filename=Template("{folder}/{test}"), property="unit_tests"),
+        load_item(filename=Template("{id}/{test}"), property="unit_tests"),
         generate_item(prompt=build_prompt),
         save_item_chat(filename=Template("chat_{id}_code_from_unit_tests.yaml")),
         parse_item(code_block="json"),
-        save_item(contents=Key("code"), filename=Template("{folder}/{source}")),
+        save_item(contents=Key("code"), filename=Template("{id}/{source}")),
         save_item(
             contents=(lambda item: {
                 'id': item.id,
@@ -75,7 +78,7 @@ pipeline = ItemPipeline(
                 'language': item.data['spec']['language'],
                 **pick(['spec', 'source', 'test'], item.data),
             }),
-            filename=Template("{folder}/info.yaml"),
+            filename=Template("{id}/info.yaml"),
             format="yaml"
         ),
     ]

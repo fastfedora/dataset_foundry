@@ -20,13 +20,16 @@ pipeline = ItemPipeline(
     setup=[
         run_pipeline(pipeline=f"{root_module}.generate_spec.pipeline"),
         reset_dataset(), # `generate_spec` creates one item per spec file, not one per sample
-        load_dataset(filename="specs.yaml", property="spec"),
+        load_dataset(
+            filename="specs.yaml",
+            property="spec",
+            id_generator=lambda index, data: f"{index+1:03d}_{data['name']}",
+        ),
     ],
     steps=[
         set_item_property(key="status", value="not-done"),
         while_item("status != 'done' and iteration < 2", [
             do_item_steps(pipeline=f"{root_module}.generate_all_from_spec.pipeline"),
-            set_item_property(key="function_name", value=Template("{spec.name}")),
             do_item_steps(pipeline=f"{root_module}.regenerate_unit_tests.pipeline"),
             if_item("unit_tests_pass == 'true'", [
                 set_item_property(key="status", value="done"),

@@ -22,11 +22,14 @@ pipeline = ItemPipeline(
     },
     config=Path(__file__).parent / "config.yaml",
     setup=[
-        load_dataset(filename="specs.yaml", property="spec"),
+        load_dataset(
+            filename="specs.yaml",
+            property="spec",
+            id_generator=lambda index, data: f"{index+1:03d}_{data['name']}",
+        ),
     ],
     steps=[
         log_item(message=Template("Generating code and unit tests for {id}...")),
-        set_item_property(key="folder", value=Template("{id}_{spec.name}")),
         set_item_property(key="source", value="source.py"),
         set_item_property(key="test", value="test.py"),
         set_item_metadata(),
@@ -34,8 +37,8 @@ pipeline = ItemPipeline(
         save_item_chat(filename=Template("chat_generate_all_from_spec_{id}.yaml")),
         parse_item(xml_block="code", output_key="code"),
         parse_item(xml_block="unit_tests", output_key="unit_tests"),
-        save_item(contents=Key("code"), filename=Template("{folder}/source.py")),
-        save_item(contents=Key("unit_tests"), filename=Template("{folder}/test.py")),
+        save_item(contents=Key("code"), filename=Template("{id}/source.py")),
+        save_item(contents=Key("unit_tests"), filename=Template("{id}/test.py")),
         save_item(
             contents=(lambda item: {
                 'id': item.id,
@@ -44,7 +47,7 @@ pipeline = ItemPipeline(
                 'language': item.data['spec']['language'],
                 **pick(['spec', 'source', 'test'], item.data),
             }),
-            filename=Template("{folder}/info.yaml"),
+            filename=Template("{id}/info.yaml"),
             format="yaml"
         ),
     ]

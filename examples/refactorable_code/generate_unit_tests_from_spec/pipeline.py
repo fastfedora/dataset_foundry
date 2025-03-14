@@ -19,15 +19,17 @@ pipeline = ItemPipeline(
     },
     config=Path(__file__).parent / "config.yaml",
     setup=[
-        load_dataset(filename="specs.yaml"),
+        load_dataset(
+            filename="specs.yaml",
+            id_generator=lambda index, data: f"{index+1:03d}_{data['name']}",
+        ),
     ],
     steps=[
-        set_item_property(key="folder", value=Template("{id}_{name}")),
         set_item_property(key="source", value="source.py"),
         set_item_property(key="test", value="test.py"),
         generate_item(prompt=Key("context.prompts.generate")),
         save_item_chat(filename=Template("chat_{id}_unit_tests_from_spec.yaml")),
         parse_item(code_block="python", output_key="code"),
-        save_item(contents=Key("code"), filename=Template("{folder}/{test}")),
+        save_item(contents=Key("code"), filename=Template("{id}/{test}")),
     ]
 )

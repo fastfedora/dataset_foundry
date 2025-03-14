@@ -13,10 +13,10 @@ pipeline = ItemPipeline(
         "author": "fastfedora",
     },
     setup=[
-        load_dataset_from_directory(include="{id|[0-9]*}_{function_name}/info.yaml"),
+        load_dataset_from_directory(include="{id}/info.yaml"),
     ],
     steps=[
-        run_unit_tests(filename=Template("{id}_{function_name}/test.py")),
+        run_unit_tests(filename=Template("{id}/test.py")),
         log_item(properties=['test_result']),
         if_item("test_result.success", [
             set_item_property(key="unit_tests_pass", value="true"),
