@@ -1,0 +1,85 @@
+prompts:
+  generate_spec: |-
+    You are tasked with fleshing out a scenario for generating code that requires refactoring.
+
+    The scenario is:
+
+    <scenario>
+    {scenario}
+    </scenario>
+
+    You need to create a spec that will be used to generate code that requires refactoring. The spec
+    should be grounded in common software development challenges and must naturally lead to code
+    that, while functionally correct, has significant opportunities for refactoring.
+
+    For example if the scenario calls for removing code smells, then your spec should include
+    instructions to add code smells to the code such as duplicated code, deep nesting, unclear
+    naming, and magic numbers. Add the challenges that are most relevant to the type of refactoring
+    described in the scenario.
+
+    Your fully-fleshed out scenario should include:
+
+    1. name: The name of the function or class.
+    2. purpose: A description of the real-world purpose of the function or class.
+    3. language: Specify the programming language for the code. For now, always use "python".
+    4. type: Indicate whether the scenario is for a function or a class.
+    5. interface: For a function, the signature of the function. Ensure that this is enclosed in
+       quotes in the YAML. For a class, a spec which includes the name of the class, the parameters
+       for its constructor, and the signatures of each method of the class. Ensure that each
+       signature is enclosed in quotes in the YAML.
+    6. length: Specify the expected code length, ranging between 1000-5000 lines.
+    7. constraints: Detail any constraints or edge cases that might be encountered.
+    8. refactoring_challenges: Identify additional challenges that encourage refactoring, including:
+      - Removing or mitigating code smells
+      - Translating between different coding paradigms (e.g., from procedural to object-oriented or
+        functional styles)
+      - Enhancing modularity and separation of concerns
+
+    The goal is to ensure that the resulting code is realistic, embodies real-world complexity, and
+    deliberately contains areas that can be improved through refactoring—not only by removing code
+    smells but also by rethinking and possibly translating the underlying code paradigm.
+
+    Return the final spec in YAML format wrapped within a ```yaml code block.
+
+  generate_spec_functions: |-
+    You are tasked with fleshing out a scenario for generating code that requires refactoring.
+
+    The scenario is:
+
+    <scenario>
+    {scenario}
+    </scenario>
+
+    You need to create a spec that will be used to generate code that requires refactoring. The spec
+    should be grounded in common software development challenges and must naturally lead to code
+    that, while functionally correct, has significant opportunities for refactoring.
+
+    For example if the scenario calls for removing code smells, then your spec should include
+    instructions to add code smells to the code such as duplicated code, deep nesting, unclear
+    naming, and magic numbers. Add the challenges that are most relevant to the type of refactoring
+    described in the scenario.
+
+    Your fully-fleshed out scenario should include:
+
+    1. name: The name of the function or class.
+    2. purpose: A description of the real-world purpose of the function or class.
+    3. language: Specify the programming language for the code. For now, always use "python".
+    4. type: Indicate whether the scenario is for a function or a class. For now, always use
+       `function`
+    5. interface: For a function, the signature of the function. Ensure that this is enclosed in
+       quotes in the YAML. For a class, a spec which includes the name of the class, the parameters
+       for its constructor, and the signatures of each method of the class. Ensure that each
+       signature is enclosed in quotes in the YAML.
+    6. length: Specify the expected code length, ranging between 1000-5000 lines.
+    7. constraints: Detail any constraints or edge cases that might be encountered.
+    8. refactoring_challenges: Identify additional challenges that encourage refactoring, including:
+      - Removing or mitigating code smells
+      - Translating between different coding paradigms (e.g., from procedural to object-oriented or
+        functional styles)
+      - Enhancing modularity and separation of concerns
+
+    The goal is to ensure that the resulting code is realistic, embodies real-world complexity, and
+    deliberately contains areas that can be improved through refactoring—not only by removing code
+    smells but also by rethinking and possibly translating the underlying code paradigm.
+
+    Return the final spec in YAML format wrapped within a ```yaml code block.

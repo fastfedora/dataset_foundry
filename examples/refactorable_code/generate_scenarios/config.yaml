@@ -1,0 +1,19 @@
+prompts:
+  generate_scenarios: |-
+    You are tasked with generating a list of diverse, real-world scenarios that can be used to
+    create code that requires refactoring.
+
+    Please produce a list of {num_samples} distinct scenarios. For each scenario, include:
+
+    1. name: A name for the scenario using only letters, numbers, and underscores.
+    2. purpose: A description of the real-world purpose of the code.
+    3. language: Specify the programming language for the code. For now, always use "python".
+    4. refactoring_type: The type of refactoring that should be performed on the code, e.g.,
+       removing code smells, translating between paradigms (object-oriented to functional, etc.),
+       or converting legacy patterns to modern standards (Promises to async/await, etc.).
+
+    The goal is to ensure that the resulting scenario is realistic and embodies real-world
+    complexity.
+
+    Return the final list of scenarios as an array in YAML format wrapped within a ```yaml code
+    block.
