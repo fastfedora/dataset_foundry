@@ -1,5 +1,6 @@
 from typing import Callable, Optional, Union
 import json
+import yaml
 
 from ...core.context import Context
 from ...core.dataset_item import DatasetItem
@@ -34,6 +35,8 @@ def parse_item(
                 # TODO: Implement this better, so it's not hidden. [fastfedora 10.Feb.25]
                 if resolved_code_block == 'json':
                     output = json.loads(output)
+                elif resolved_code_block == 'yaml':
+                    output = yaml.safe_load(output)
             elif resolved_xml_block:
                 output = extract_xml_block(resolved_input, resolved_xml_block)
             else:
