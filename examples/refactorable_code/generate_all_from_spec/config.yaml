@@ -36,8 +36,23 @@ prompts:
     {spec:yaml}
     </spec>
 
-    When writing your unit tests, make sure to import the function being tested. The name of the
-    module can be derived from this template: item_{id}_{spec.name}
+    When writing your unit tests, follow these guidelines:
+    1. Use pytest's function-based syntax rather than unittest classes:
+       - Write individual test functions starting with 'test_'
+       - Use simple assert statements (not unittest assertion methods)
+    2. Implement pytest fixtures for setup and dependency injection:
+       - Use @pytest.fixture for common test dependencies
+       - Parameterize tests with @pytest.mark.parametrize where appropriate
+    3. Include proper imports:
+       - `import pytest`
+       - `from unittest.mock import MagicMock`, patch (when mocking is needed)
+       - import the modules being tested. The name of the source file to import from is '{source}'.
+    4. Follow best practices:
+       - One assertion per test when possible
+       - Descriptive test function names that explain what they're testing
+       - Use pytest.raises for testing exceptions
+       - Include docstrings explaining test purpose for complex tests
+    5. Organize related tests logically using test classes only when necessary
 
     Follow best practices for unit testing and include proper assertions for each test case. The
     units test should thoroughly test the function. Any libraries you anticipate being used by
@@ -62,10 +77,13 @@ prompts:
     Generate a Python function or class that adheres to the provided specification. The code must be
     functionally correct but intentionally include the listed code smells and design issues. Ensure
     the code meets the specified length requirement and reflects realistic, complex, and
-    refactorable real-world scenarios. Only use built-in Python libraries; do not use any libraries
-    that require being installed for the main function to execute. Also, do not add any comments
-    mentioning the code smells; comments unrelated to the code smells are allowed. Write the code as
-    a junior programmer would with the type of comments that a junior programmer would use.
+    refactorable real-world scenarios.
+
+    Important: Only use built-in Python libraries; do not use any libraries that require being
+    installed for the main function to execute (e.g., `pandas`, `numpy`). Also, do not add any
+    comments mentioning the code smells; comments unrelated to the code smells are allowed. Write
+    the code as a junior programmer would with the type of comments that a junior programmer would
+    use.
 
     2. **Unit Tests:**
     Create a comprehensive suite of unit tests for the generated function or class using a testing
