@@ -16,6 +16,7 @@ def load_dataset(
         filename: Union[Callable,Key,str] = "dataset.yaml",
         dir: Union[Callable,Key,str] = Key("context.input_dir"),
         property: Union[Callable,Key,str] = None,
+        id_generator: Callable = lambda index, _data: f"{index+1:03d}",
     ) -> DatasetAction:
     async def load_dataset_action(dataset: Dataset, context: Context):
         resolved_dir = resolve_dataset_value(dir, dataset, context, required_as="dir")
@@ -38,7 +39,7 @@ def load_dataset(
 
         for i, data in enumerate(dataset_items):
             item = DatasetItem(
-                id=f"{i+1:03d}",
+                id=id_generator(i, data),
                 data={ resolved_property: data } if resolved_property else data
             )
             dataset.add(item)
