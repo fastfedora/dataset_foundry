@@ -1,0 +1,24 @@
+prompts:
+  generate_task: |-
+    Below is code that requires refactoring, along with a list of potential issues that might exist
+    in the code. Can you identify the top 3 most important issues that need to be addressed, and
+    write a task that can be used to address them?
+
+    <code>
+    {code}
+    </code>
+
+    <issues>
+    {spec.refactoring_challenges:yaml}
+    </issues>
+
+    Return your response in YAML format wrapped in ```yaml tags as a list of high-level tasks. For
+    instance:
+
+    ```yaml
+    - High-level Task 1
+    - High-level Task 2
+    - High-level Task 3
+    ```
+
+    Do not include any other text in your response.
