@@ -17,10 +17,12 @@ def build_prompt(user: str, variables: dict):
 def generate_item(
         prompt: Union[Callable,Key,str] = Key("context.prompt"),
         model: Union[Callable,Key,str] = Key("context.model"),
+        output_key: Union[Callable,Key,str] = "output",
     ) -> ItemAction:
     async def generate_item_action(item: DatasetItem, context: Context):
         resolved_prompt = resolve_item_value(prompt, item, context, required_as="prompt")
         resolved_model = resolve_item_value(model, item, context, required_as="model")
+        resolved_output_key = resolve_item_value(output_key, item, context)
 
         if (isinstance(resolved_prompt, str)):
             resolved_prompt = build_prompt(resolved_prompt, { "id": item.id, **item.data })
@@ -31,7 +33,7 @@ def generate_item(
         item.push({
                 "messages": messages,
                 "response": response,
-                "output": response.content,
+                resolved_output_key: response.content,
         }, generate_item);
 
     return generate_item_action
