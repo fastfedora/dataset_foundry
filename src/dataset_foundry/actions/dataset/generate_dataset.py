@@ -31,7 +31,16 @@ def generate_dataset(
         variables = re.findall(variable_regex, resolved_prompt)
         prompt_template = ChatPromptTemplate.from_messages([ ("user", resolved_prompt) ])
         model_prompt = prompt_template.partial(
-            **{variable: context[variable] for variable in variables},
+            **{
+                variable: context[variable]
+                for variable in variables
+                if variable in context
+            },
+            **{
+                variable: dataset.metadata.get(variable)
+                for variable in variables
+                if variable in dataset.metadata
+            },
         )
 
         # Generate the response
