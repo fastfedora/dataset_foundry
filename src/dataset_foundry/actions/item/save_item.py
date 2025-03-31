@@ -22,6 +22,12 @@ def save_item(
         resolved_contents = resolve_item_value(contents, item, context) or item.data
         resolved_format = resolve_item_value(format, item, context)
 
+        if resolved_format == "auto":
+            if resolved_filename.endswith(".yaml") or resolved_filename.endswith(".yml"):
+                resolved_format = "yaml"
+            elif resolved_filename.endswith(".json"):
+                resolved_format = "json"
+
         if resolved_format == 'json':
             resolved_contents = json.dumps(resolved_contents, indent=2)
         elif resolved_format == 'yaml':
