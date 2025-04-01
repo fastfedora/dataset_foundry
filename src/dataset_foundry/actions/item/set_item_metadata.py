@@ -24,11 +24,7 @@ def set_item_metadata(
 
         metadata = {
             "pipeline": get_pipeline_metadata(context),
-            "model": {
-                "name": context.model.model,
-                "kwargs": context.model.model_kwargs,
-                "temperature": context.temperature,
-            },
+            "model": context.model.info,
             "created_at": datetime.now().isoformat(),
         }
 

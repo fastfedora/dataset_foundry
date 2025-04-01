@@ -8,10 +8,17 @@ from langchain_anthropic import ChatAnthropic
 MAX_TOKENS = 8096
 
 class Model:
+    _provider: str
+    _model_name: str
     _model: BaseChatModel
+    _temperature: float | None
 
-    def __init__(self, model: str, temperature: float = None):
+    def __init__(self, model: str, temperature: float | None = None):
         provider, model_name = Model._parse_model_string(model)
+
+        self._provider = provider
+        self._model_name = model_name
+        self._temperature = temperature
 
         if provider == "openai":
             args = {
@@ -44,6 +51,19 @@ class Model:
                 f"Invalid model format: {model_string}. "
                 "Expected format: 'provider/model_name' (e.g., 'openai/gpt-4-turbo' or 'anthropic/claude-3-sonnet')"
             )
+
+    @property
+    def info(self) -> dict:
+        """
+        Return a dictionary containing information about the model.
+        """
+
+        return {
+            "provider": self._provider,
+            "name": self._model_name,
+            "kwargs": self._model.model_kwargs,
+            "temperature": self._temperature,
+        }
 
     async def ainvoke(self, messages: List[BaseMessage], **kwargs) -> BaseMessage:
         return await self._model.ainvoke(messages, **kwargs)
