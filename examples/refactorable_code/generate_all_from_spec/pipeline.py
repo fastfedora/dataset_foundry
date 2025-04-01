@@ -34,7 +34,7 @@ pipeline = ItemPipeline(
         set_item_property(key="test", value="test.py"),
         set_item_metadata(),
         generate_item(prompt=Key("context.prompts.generate_functions_and_classes")),
-        save_item_chat(filename=Template("chat_generate_all_from_spec_{id}.yaml")),
+        save_item_chat(filename=Template("{id}/chat_{metadata.created_at}_generate_all_from_spec.yaml")),
         parse_item(xml_block="code", output_key="code"),
         parse_item(xml_block="unit_tests", output_key="unit_tests"),
         save_item(contents=Key("code"), filename=Template("{id}/source.py")),

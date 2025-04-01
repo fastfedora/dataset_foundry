@@ -67,7 +67,7 @@ pipeline = ItemPipeline(
         set_item_metadata(),
         load_item(filename=Template("{id}/{test}"), property="unit_tests"),
         generate_item(prompt=build_prompt),
-        save_item_chat(filename=Template("chat_{id}_code_from_unit_tests.yaml")),
+        save_item_chat(filename=Template("{id}/chat_{metadata.created_at}_code_from_unit_tests.yaml")),
         parse_item(code_block="json"),
         save_item(contents=Key("code"), filename=Template("{id}/{source}")),
         save_item(

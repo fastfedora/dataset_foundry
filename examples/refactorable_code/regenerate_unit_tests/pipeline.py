@@ -42,7 +42,7 @@ pipeline = ItemPipeline(
                 if_item("context.log_level == 'debug'", [
                     log_item(properties=['original_result.stdout']),
                 ]),
-                save_item_chat(filename=Template("chat_{id}_regenerate_unit_tests.yaml")),
+                save_item_chat(filename=Template("{id}/chat_{metadata.created_at}_regenerate_unit_tests.yaml")),
                 parse_item(code_block="python", output_key="unit_tests"),
                 save_item(
                     contents=(lambda item: item.data["unit_tests"]),

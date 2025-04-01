@@ -65,7 +65,7 @@ pipeline = ItemPipeline(
         set_item_property(key="source", value="source.py"),
         set_item_metadata(),
         generate_item(prompt=build_prompt),
-        save_item_chat(filename=Template("chat_{id}_generate_code_from_spec.yaml")),
+        save_item_chat(filename=Template("{id}/chat_{metadata.created_at}_generate_code_from_spec.yaml")),
         parse_item(code_block="json"),
         save_item(contents=Key("code"), filename=Template("{id}/{source}")),
         save_item(
