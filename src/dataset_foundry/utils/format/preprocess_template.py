@@ -6,7 +6,7 @@ from typing import Any, Dict, Tuple, Optional
 from ...utils.get import get
 
 DEFAULT_FORMATTERS = {
-    "yaml": lambda v: yaml.dump(v, default_flow_style=False, sort_keys=False),
+    "yaml": lambda v: yaml.dump(v, default_flow_style=False, sort_keys=False, width=100),
     "json": lambda v: json.dumps(v, indent=2),
     "upper": lambda v: str(v).upper(),
     "lower": lambda v: str(v).lower()
