@@ -17,3 +17,14 @@ prompts:
 
     Return the final list of scenarios as an array in YAML format wrapped within a ```yaml code
     block.
+
+  generate_different_scenarios: |-
+    {#prompts.generate_scenarios}
+
+    The following scenarios have already been generated:
+
+    <prior_scenarios>
+    {prior_scenarios}
+    </prior_scenarios>
+
+    Please generate new scenarios that are different from the ones above.
