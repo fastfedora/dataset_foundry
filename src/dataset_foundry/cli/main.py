@@ -103,7 +103,7 @@ async def main_cli():
     args["output_dir"] = parse_dir_arg(args["output_dir"], DATASET_DIR / args["dataset"], True)
     args["config_dir"] = parse_dir_arg(args["config_dir"], Path(args["pipeline"]).parent, False)
     args["log_dir"] = parse_dir_arg(args["log_dir"], LOG_DIR / args["dataset"], True)
-    args["model"] = Model.create(
+    args["model"] = Model(
         model=args["model"],
         temperature=args["temperature"]
     )
