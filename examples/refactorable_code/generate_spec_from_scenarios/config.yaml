@@ -27,7 +27,7 @@ prompts:
        quotes in the YAML. For a class, a spec which includes the name of the class, the parameters
        for its constructor, and the signatures of each method of the class. Ensure that each
        signature is enclosed in quotes in the YAML.
-    6. length: Specify the expected code length, ranging between 1000-5000 lines.
+    6. length: Specify the expected code length, ranging between 200-400 lines.
     7. constraints: Detail any constraints or edge cases that might be encountered.
     8. refactoring_challenges: Identify additional challenges that encourage refactoring, including:
       - Removing or mitigating code smells
@@ -70,7 +70,7 @@ prompts:
        quotes in the YAML. For a class, a spec which includes the name of the class, the parameters
        for its constructor, and the signatures of each method of the class. Ensure that each
        signature is enclosed in quotes in the YAML.
-    6. length: Specify the expected code length, ranging between 1000-5000 lines.
+    6. length: Specify the expected code length, ranging between 200-400 lines.
     7. constraints: Detail any constraints or edge cases that might be encountered.
     8. refactoring_challenges: Identify additional challenges that encourage refactoring, including:
       - Removing or mitigating code smells
