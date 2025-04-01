@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from langchain.chat_models.base import BaseChatModel
@@ -6,6 +7,8 @@ from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 
 MAX_TOKENS = 8096
+
+logger = logging.getLogger(__name__)
 
 class Model:
     _provider: str
@@ -66,4 +69,12 @@ class Model:
         }
 
     async def ainvoke(self, messages: List[BaseMessage], **kwargs) -> BaseMessage:
-        return await self._model.ainvoke(messages, **kwargs)
+        response = await self._model.ainvoke(messages, **kwargs)
+
+        if (
+            'stop_reason' in response.response_metadata and
+            response.response_metadata['stop_reason'] == 'max_tokens'
+        ):
+            logger.warning("Max tokens hit when generating response.")
+
+        return response
