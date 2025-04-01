@@ -2,6 +2,7 @@ from pathlib import Path
 
 from dataset_foundry.actions.dataset.load_dataset import load_dataset
 from dataset_foundry.actions.dataset.load_dataset_from_directory import load_dataset_from_directory
+from dataset_foundry.actions.item.do_item_steps import do_item_steps
 from dataset_foundry.actions.item.generate_item import generate_item
 from dataset_foundry.actions.item.log_item import log_item
 from dataset_foundry.actions.item.save_item_chat import save_item_chat
@@ -13,6 +14,8 @@ from dataset_foundry.core.key import Key
 from dataset_foundry.core.template import Template
 from dataset_foundry.core.item_pipeline import ItemPipeline
 from dataset_foundry.utils.collections.pick import pick
+
+root_module = "examples.refactorable_code"
 
 pipeline = ItemPipeline(
     name="generate_all_from_spec",
@@ -39,6 +42,8 @@ pipeline = ItemPipeline(
         save_item_chat(filename=Template("{id}/chat_{metadata.created_at}_generate_all_from_spec.yaml")),
         parse_item(xml_block="code", output_key="code"),
         parse_item(xml_block="unit_tests", output_key="unit_tests"),
+        set_item_property(key="skip_saving_refactor_tasks", value="true"),
+        do_item_steps(pipeline=f"{root_module}.add_refactor_task.pipeline"),
         save_item(contents=Key("code"), filename=Template("{id}/source.py")),
         save_item(contents=Key("unit_tests"), filename=Template("{id}/test.py")),
         save_item(
@@ -47,7 +52,7 @@ pipeline = ItemPipeline(
                 'metadata': item.data['metadata'],
                 'name': item.data['spec']['name'],
                 'language': item.data['spec']['language'],
-                **pick(['spec', 'source', 'test'], item.data),
+                **pick(['spec', 'source', 'test', 'refactor_tasks'], item.data),
             }),
             filename=Template("{id}/info.yaml"),
             format="yaml"

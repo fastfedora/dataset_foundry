@@ -2,6 +2,7 @@ from pathlib import Path
 
 from dataset_foundry.actions.dataset.load_dataset_from_directory import load_dataset_from_directory
 from dataset_foundry.actions.item.generate_item import generate_item
+from dataset_foundry.actions.item.if_item import if_item
 from dataset_foundry.actions.item.log_item import log_item
 from dataset_foundry.actions.item.parse_item import parse_item
 from dataset_foundry.actions.item.save_item import save_item
@@ -26,13 +27,15 @@ pipeline = ItemPipeline(
         log_item(message=Template("Generating refactor tasks for {id}...")),
         generate_item(prompt=Key("context.prompts.generate_task")),
         parse_item(code_block="yaml", output_key="refactor_tasks"),
-        save_item(
-            contents=(lambda item: {
-                'id': item.id,
+        if_item("not skip_saving_refactor_tasks", [
+            save_item(
+                contents=(lambda item: {
+                    'id': item.id,
                 **omit(['messages', 'response', 'output', 'code'], item.data),
-            }),
-            filename=Template("{id}/info.yaml"),
-            format="yaml"
-        ),
+                }),
+                filename=Template("{id}/info.yaml"),
+                format="yaml"
+            ),
+        ]),
     ]
 )
