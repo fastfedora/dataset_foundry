@@ -10,6 +10,6 @@ DATASET_DIR = PROJECT_ROOT / "datasets"
 LOG_DIR = PROJECT_ROOT / "logs"
 
 # Model configuration
-DEFAULT_MODEL = "openai:gpt-4o-mini"
+DEFAULT_MODEL = "openai/gpt-4o-mini"
 DEFAULT_MODEL_TEMPERATURE = 0.7
 DEFAULT_NUM_SAMPLES = 10
