@@ -1,6 +1,6 @@
 [project]
 version = "0.1.0"
-name = "dataset_foundry"
+name = "dataset-foundry"
 description = "Build and refine datasets using LLMs"
 readme = "README.md"
 authors = [
@@ -20,11 +20,11 @@ dependencies = [
 ]
 
 [project.scripts]
-dataset-foundry = "src.dataset_foundry.cli.main:main"
+dataset-foundry = "dataset_foundry.cli.main:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src"]
+packages = ["src/dataset_foundry"]
