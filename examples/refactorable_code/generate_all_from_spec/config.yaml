@@ -116,3 +116,4 @@ prompts:
       - Generate complete test functions using pytest style (no test class needed).
       - Include proper imports and any necessary setup/teardown.
       - Make sure to include proper assertions for each test case.
+      - Make sure the unit test can be run quickly. Do not include `time.sleep()` in the unit test.
