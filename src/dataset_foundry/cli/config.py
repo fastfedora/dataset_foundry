@@ -5,9 +5,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Project paths
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-DATASET_DIR = PROJECT_ROOT / "datasets"
-LOG_DIR = PROJECT_ROOT / "logs"
+OUTPUT_ROOT = Path.cwd()
+DATASET_DIR = OUTPUT_ROOT / "datasets"
+LOG_DIR = OUTPUT_ROOT / "logs"
 
 # Model configuration
 DEFAULT_MODEL = "openai/gpt-4o-mini"
