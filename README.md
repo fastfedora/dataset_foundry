@@ -6,6 +6,8 @@ Dataset Foundry uses the concept of data pipelines to load, generate or validate
 pipeline is a sequence of actions executed either against the dataset itself or the individual items
 in the dataset.
 
+For details on which actions are supported, see the [actions](docs/actions.md) documentation.
+
 ## Setup
 
 1. Clone the repository
