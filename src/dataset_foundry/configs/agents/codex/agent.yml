@@ -1,0 +1,8 @@
+image: "codex-agent:latest"
+working_dir: "/workspace"
+environment:
+  OPENAI_API_KEY: "${OPENAI_API_KEY}"
+  LANG: "en_US.UTF-8"
+entrypoint: ["bash", "-c", "cat /workspace/PROMPT.md | codex exec --skip-git-repo-check"]
+build_args:
+  BUILDKIT_INLINE_CACHE: "1"
