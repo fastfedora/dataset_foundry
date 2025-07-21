@@ -46,7 +46,21 @@ class ContainerManager:
         Args:
             docker_client: Optional Docker client instance
         """
-        self.docker_client = docker_client or docker.from_env()
+        try:
+            self.docker_client = docker_client or docker.from_env()
+        except Exception as e:
+            error = str(e)
+
+            # HACK: The docker library should be throwing a more specific error here, but it's not
+            #       so we're checking for the error message manually. [fastfedora 21.Jul.25]
+            if (
+                "while fetching server API version" in error and
+                "Connection aborted" in error and
+                "FileNotFoundError" in error
+            ):
+                raise DockerException("Docker does not appear to be running") from None
+            else:
+                raise e
 
     async def build_image(
         self,
