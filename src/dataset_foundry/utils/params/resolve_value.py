@@ -1,5 +1,4 @@
 import logging
-from toolz import get_in
 from typing import Any, Callable, Optional, Union
 
 from ...core.context import Context

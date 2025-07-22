@@ -43,10 +43,8 @@ def resolve_environment_dict(environment: Dict[str, Any]) -> Dict[str, Any]:
             system_value = os.environ.get(var_name)
 
             if system_value is not None and system_value != "":
-                print("...resolved", key, system_value)
                 environment[key] = system_value
             elif default_value is not None and default_value != "":
-                print("...resolved", key, default_value)
                 environment[key] = default_value
             else:
                 # Pass through the expression as-is
