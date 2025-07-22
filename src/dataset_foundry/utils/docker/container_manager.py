@@ -5,24 +5,116 @@ Container manager for orchestrating Docker containers.
 import asyncio
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union, Any
+
 import docker
 from docker.errors import DockerException
+from docker.types import Mount
 from pydantic import BaseModel, model_validator
 
 logger = logging.getLogger(__name__)
 
 
+class BuildConfig(BaseModel):
+    """Configuration for building a Docker image."""
+
+    context: Optional[str] = None
+    """Either a path to a directory containing a Dockerfile, or a URL to a Git repository."""
+
+    dockerfile: Optional[str] = None
+    """The path to an alternate Dockerfile to build."""
+
+    target: Optional[str] = None
+    """The stage to build as defined inside a multi-stage Dockerfile."""
+
+    args: Optional[Dict[str, str]] = None
+    """The build arguments to pass to the Dockerfile."""
+
+
 class ContainerConfig(BaseModel):
     """Configuration for a Docker container."""
+
+    model_config = { "arbitrary_types_allowed": True }
+
     image: str
+    """The image to run."""
+
+    build: Optional[BuildConfig] = None
+    """The settings to use when building the image."""
+
     command: Optional[List[str]] = None
-    environment: Optional[Dict[str, str]] = None
-    volumes: Optional[Dict[str, Dict[str, str]]] = None
+    """The command to run in the container."""
+
+    entrypoint: Optional[List[str]] = None
+    """The entrypoint for the container, overriding the default entrypoint."""
+
+    user: Optional[str] = None
+    """The user to run commands as inside the container."""
+
     working_dir: Optional[str] = None
+    """The working directory for the container."""
+
+    environment: Optional[Dict[str, str]] = None
+    """The environment variables to set in the container."""
+
     network_mode: Optional[str] = None
-    remove: bool = True
-    timeout: int = 3600
+    """The network mode for the container."""
+
+    volumes: Optional[Union[List[str], List[Mount]]] = None
+    """The volumes to mount in the container."""
+
+    cap_add: Optional[List[str]] = None
+    """The capabilities to add to the container."""
+
+    cap_drop: Optional[List[str]] = None
+    """The capabilities to drop from the container."""
+
+    auto_remove: Optional[bool] = True
+    """Whether to remove the container when it has finished running. Default: True."""
+
+    timeout: Optional[int] = 3600
+    """The timeout for the container to run."""
+
+    @model_validator(mode="before")
+    @classmethod
+    def preprocess(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        """Preprocess the container configuration."""
+        if "build" in values:
+            values["build"] = BuildConfig(**values["build"])
+
+        if "volumes" in values and values["volumes"] is not None:
+            values["volumes"] = [cls.parse_mount(volume) for volume in values["volumes"]]
+
+        return values
+
+    @classmethod
+    def parse_mount(cls, config: Union[str, Dict[str, Any], Mount]) -> Mount:
+        """Parse a mount configuration into a Mount object."""
+        if isinstance(config, Mount):
+            return config
+
+        elif isinstance(config, str):
+            # Parse Docker Compose shorthand: 'host_path:container_path[:mode]'
+            parts = config.split(":")
+            if len(parts) < 2:
+                raise ValueError(f"Invalid volume format: {config}")
+
+            source = parts[0]
+            target = parts[1]
+            mode = parts[2] if len(parts) > 2 else None
+
+            if source == "tmpfs":
+                mount_type = "tmpfs"
+            elif source.startswith(".") or Path(source).is_absolute():
+                mount_type = "bind"
+            else:
+                mount_type = "volume"
+
+            return Mount(source=source, target=target, read_only=(mode == 'ro'), type=mount_type)
+
+        elif isinstance(config, dict):
+            # Long syntax: already a dictionary, convert to Mount
+            return Mount(**config)
 
 
 class ContainerResult(BaseModel):
@@ -72,33 +164,40 @@ class ContainerManager:
         except:
             return False
 
+    def get_image_config(self, image_name: str) -> Any:
+        """Get the configuration of a Docker image."""
+        return self._docker_client.images.get(image_name).attrs['Config']
+
     async def build_image(
         self,
-        dockerfile_path: Path,
         image_name: str,
-        build_args: Optional[Dict[str, str]] = None,
+        config: BuildConfig,
         stream_logs: bool = False
     ) -> str:
         """
         Build a Docker image from a Dockerfile.
 
         Args:
-            dockerfile_path: Path to directory containing Dockerfile
             image_name: Name for the built image
-            build_args: Optional build arguments
+            config: Configuration settings for building the image
             stream_logs: Whether to stream build logs to logger.info (default: False)
 
         Returns:
             Image ID of the built image
         """
         try:
-            logger.info(f"Building image {image_name} from {dockerfile_path}")
+            if not config.context:
+                raise ValueError("The 'context' path is required for building an image")
+
+            logger.info(f"Building image {image_name} from {config.context}")
 
             # Use low-level API for streaming logs
-                path=str(dockerfile_path),
             response = self._docker_client.api.build(
+                path=str(config.context),
+                dockerfile=config.dockerfile,
+                buildargs=config.args,
+                target=config.target,
                 tag=image_name,
-                buildargs=build_args,
                 rm=True,
                 decode=True
             )
@@ -153,11 +252,15 @@ class ContainerManager:
             container = self._docker_client.containers.run(
                 image=config.image,
                 command=config.command,
+                entrypoint=config.entrypoint,
+                user=config.user,
                 environment=config.environment,
-                volumes=config.volumes,
+                mounts=config.volumes,
                 working_dir=config.working_dir,
                 network_mode=config.network_mode,
-                remove=config.remove,
+                cap_add=config.cap_add,
+                cap_drop=config.cap_drop,
+                auto_remove=config.auto_remove,
                 detach=True,
             )
 
@@ -170,7 +273,7 @@ class ContainerManager:
             raise
         finally:
             # Handle orphaned containers - only if remove=False and container still exists
-            if container and not config.remove:
+            if container and not config.auto_remove:
                 try:
                     # Check if container still exists (hasn't been auto-removed)
                     container.reload()

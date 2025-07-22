@@ -5,12 +5,15 @@ Agent runner for executing different types of agents in containers.
 import logging
 import json
 import yaml
-import os
+from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Any, Optional, List
+
+from docker.types import Mount
 from pydantic import BaseModel
 
 from .container_manager import ContainerManager, ContainerConfig, ContainerResult
+from ..params.resolve_environment_dict import resolve_environment_dict
 
 logger = logging.getLogger(__name__)
 agent_configs_dir = Path(__file__).parent.parent.parent / "configs" / "agents"
@@ -19,12 +22,7 @@ agent_configs_dir = Path(__file__).parent.parent.parent / "configs" / "agents"
 class AgentConfig(BaseModel):
     """Configuration for an agent type."""
     name: str
-    image: str
-    entrypoint: Optional[List[str]] = None
-    working_dir: str = "/workspace"
-    environment: Optional[Dict[str, str]] = None
-    volumes: Optional[Dict[str, Dict[str, str]]] = None
-    build_args: Optional[Dict[str, str]] = None
+    container: ContainerConfig
 
 
 class AgentInputs(BaseModel):
@@ -49,6 +47,8 @@ class AgentResult(BaseModel):
 
 class AgentRunner:
     """Runs different types of agents in Docker containers."""
+
+    _config: Optional[AgentConfig] = None
 
     def __init__(
         self,
@@ -120,8 +120,8 @@ class AgentRunner:
             logger.info(f"Loaded agent configuration from {agent_config_path}")
 
             return AgentConfig(
-                **config_data,
                 name=self.agent_type,
+                container=ContainerConfig(**config_data['container']),
             )
         else:
             raise ValueError(
@@ -135,16 +135,24 @@ class AgentRunner:
             logger.info(f"Image {self._config.container.image} already exists")
             return
 
-        dockerfile_path = agent_configs_dir / self._config.name
-        if dockerfile_path and dockerfile_path.exists():
+        config = deepcopy(self._config.container.build)
+        agent_config_dir = agent_configs_dir / self._config.name
+
+        if not config.context:
+            config.context = agent_config_dir
+        elif not Path(config.context).is_absolute():
+            config.context = agent_config_dir / config.context
+
+        config.args = resolve_environment_dict(config.args)
+
+        if config.context and Path(config.context).exists():
             await self.container_manager.build_image(
-                dockerfile_path=dockerfile_path,
-                image_name=self._config.image,
-                build_args=self._config.build_args,
+                image_name=self._config.container.image,
+                config=config,
                 stream_logs=stream_logs
             )
         else:
-            raise ValueError(f"No Dockerfile found for agent {self._config.name}")
+            raise ValueError(f"No context found for agent {self._config.name} at {config.context}")
 
     def _prepare_container_config(
         self,
@@ -153,54 +161,56 @@ class AgentRunner:
     ) -> ContainerConfig:
         """Prepare container configuration for agent execution."""
 
-        volumes = {
-            str(output_dir): {"bind": "/workspace", "mode": "rw"},
-            inputs.instructions_file: {"bind": "/workspace/AGENTS.md", "mode": "ro"},
-            inputs.prompt_file: {"bind": "/workspace/PROMPT.md", "mode": "ro"},
-            inputs.spec_file: {"bind": "/workspace/spec.yaml", "mode": "ro"},
-        }
+        config = deepcopy(self._config.container)
+        image_config = self.container_manager.get_image_config(self._config.container.image)
+        working_dir = config.working_dir or image_config.get("WorkingDir")
 
-        # Add agent-specific volumes
-        if self._config.volumes:
-            volumes.update(self._config.volumes)
+        if not working_dir:
+            raise ValueError(f"No working directory configured for {self.agent_type}")
 
-        environment = {
+        inputs_dir = Path(working_dir) / "input"
+
+        if not config.volumes:
+            config.volumes = []
+        else:
+            for volume in config.volumes:
+                if not Path(volume['Source']).is_absolute():
+                    volume['Source'] = str(output_dir / volume['Source'])
+
+        config.volumes.extend([
+            Mount(target=working_dir, source=str(output_dir), type="bind", read_only=False),
+            Mount(
+                target=f"{inputs_dir}/AGENTS.md",
+                source=str(inputs.instructions_file),
+                type="bind",
+                read_only=True
+            ),
+            Mount(
+                target=f"{inputs_dir}/PROMPT.md",
+                source=str(inputs.prompt_file),
+                type="bind",
+                read_only=True
+            ),
+            Mount(
+                target=f"{inputs_dir}/spec.yaml",
+                source=str(inputs.spec_file),
+                type="bind",
+                read_only=True
+            ),
+        ])
+
+        if not config.environment:
+            config.environment = {}
+
+        config.environment.update({
             "ITEM_ID": inputs.item_id,
-            "OUTPUT_DIR": "/workspace/repo",
+            "OUTPUT_DIR": f"{working_dir}/output",
             "CONTEXT_DATA": json.dumps(inputs.context_data),
-        }
+        })
 
-        if self._config.environment:
-            # Handle environment variable substitution
-            for key, value in self._config.environment.items():
-                if isinstance(value, str) and value.startswith("${") and value.endswith("}"):
-                    # Extract variable name and get from system environment
-                    var_name = value[2:-1]  # Remove ${ and }
-                    system_value = os.environ.get(var_name)
-                    if system_value:
-                        environment[key] = system_value
-                    else:
-                        logger.warning(f"Environment variable {var_name} not found")
-                else:
-                    environment[key] = value
+        config.environment = resolve_environment_dict(config.environment)
 
-        command = self._config.entrypoint or [
-            "python", "-m", "agent.main",
-            "--instructions", "/workspace/AGENTS.md",
-            "--prompt", "/workspace/PROMPT.md",
-            "--spec", "/workspace/spec.yaml",
-            "--repo-dir", "/workspace/repo"
-        ]
-
-        return ContainerConfig(
-            image=self._config.image,
-            command=command,
-            environment=environment,
-            volumes=volumes,
-            working_dir=self._config.working_dir,
-            remove=True,
-            timeout=3600
-        )
+        return config
 
     def _process_container_result(
         self,
