@@ -37,6 +37,8 @@ class ContainerResult(BaseModel):
 class ContainerManager:
     """Manages Docker container lifecycle and execution."""
 
+    _docker_client: docker.DockerClient
+
     def __init__(self, docker_client: Optional[docker.DockerClient] = None):
         """
         Initialize the container manager.
@@ -45,7 +47,7 @@ class ContainerManager:
             docker_client: Optional Docker client instance
         """
         try:
-            self.docker_client = docker_client or docker.from_env()
+            self._docker_client = docker_client or docker.from_env()
         except Exception as e:
             error = str(e)
 
@@ -59,6 +61,16 @@ class ContainerManager:
                 raise DockerException("Docker does not appear to be running") from None
             else:
                 raise e
+
+    def image_exists(self, image_name: str) -> bool:
+        """Returns True if a Docker image exists with no errors; False otherwise."""
+        try:
+            self._docker_client.images.get(image_name)
+
+            # If no exception is raised, the image exists
+            return True
+        except:
+            return False
 
     async def build_image(
         self,
@@ -83,8 +95,8 @@ class ContainerManager:
             logger.info(f"Building image {image_name} from {dockerfile_path}")
 
             # Use low-level API for streaming logs
-            response = self.docker_client.api.build(
                 path=str(dockerfile_path),
+            response = self._docker_client.api.build(
                 tag=image_name,
                 buildargs=build_args,
                 rm=True,
@@ -138,7 +150,7 @@ class ContainerManager:
         try:
             logger.debug(f"Running container {config.image} with command {config.command}")
 
-            container = self.docker_client.containers.run(
+            container = self._docker_client.containers.run(
                 image=config.image,
                 command=config.command,
                 environment=config.environment,

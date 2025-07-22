@@ -131,13 +131,9 @@ class AgentRunner:
 
     async def _ensure_image_built(self, stream_logs: bool = False):
         """Ensure the agent's Docker image is built."""
-        try:
-            # Check if image exists
-            self.container_manager.docker_client.images.get(self._config.image)
-            logger.info(f"Image {self._config.image} already exists")
+        if self.container_manager.image_exists(self._config.container.image):
+            logger.info(f"Image {self._config.container.image} already exists")
             return
-        except:
-            pass
 
         dockerfile_path = agent_configs_dir / self._config.name
         if dockerfile_path and dockerfile_path.exists():
