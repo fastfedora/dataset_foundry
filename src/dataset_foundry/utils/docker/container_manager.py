@@ -260,8 +260,11 @@ class ContainerManager:
                 network_mode=config.network_mode,
                 cap_add=config.cap_add,
                 cap_drop=config.cap_drop,
-                auto_remove=config.auto_remove,
                 detach=True,
+                # NOTE: Handling remove manually in finally block; otherwise if the command executes
+                #       too quickly, the container will be removed before we have a chance to grab
+                #       the logs in `_wait_for_container`. [fastfedora 22.Jul.25]
+                # auto_remove=config.auto_remove,
             )
 
             return await self._wait_for_container(container, timeout or config.timeout, stream_logs)
@@ -272,15 +275,19 @@ class ContainerManager:
             logger.error(f"Container execution error: {e}")
             raise
         finally:
-            # Handle orphaned containers - only if remove=False and container still exists
-            if container and not config.auto_remove:
-                try:
-                    # Check if container still exists (hasn't been auto-removed)
-                    container.reload()
-                    logger.info(f"Container {container.id} completed successfully")
-                except Exception:
-                    # Container was already removed or doesn't exist
-                    pass
+            if container:
+                if config.auto_remove:
+                    # Remove the container and its volumes
+                    container.remove(v=True)
+                else:
+                    # Handle orphaned containers: only if auto_remove=False & container still exists
+                    try:
+                        # Check if container still exists (hasn't been auto-removed)
+                        container.reload()
+                        logger.info(f"Container {container.id} completed successfully")
+                    except Exception:
+                        # Container was already removed or doesn't exist
+                        pass
 
     async def _wait_for_container(
         self,
