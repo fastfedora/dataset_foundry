@@ -307,27 +307,42 @@ class ContainerManager:
     ) -> ContainerResult:
         """Wait for a detached container to complete while streaming logs."""
         try:
+            # Collect each stream in a separate buffer, plus an interweaved buffer for full logs
+            stdout = []
+            stderr = []
             logs = []
-            log_stream = container.logs(stdout=True, stderr=True, stream=True, follow=True)
-            log_task = asyncio.create_task(
-                self._stream_container_logs(log_stream, logs, container.id, stream_logs)
+            stdout_stream = container.logs(stdout=True, stderr=False, stream=True, follow=True)
+            stderr_stream = container.logs(stdout=False, stderr=True, stream=True, follow=True)
+            logs_stream = container.logs(stdout=True, stderr=True, stream=True, follow=True)
+
+            # Only print the interweaved logs; the other streams are just for collection
+            stdout_task = asyncio.create_task(
+                self._stream_container_logs(stdout_stream, stdout, container.id, False)
+            )
+            stderr_task = asyncio.create_task(
+                self._stream_container_logs(stderr_stream, stderr, container.id, False)
+            )
+            logs_task = asyncio.create_task(
+                self._stream_container_logs(logs_stream, logs, container.id, stream_logs)
             )
 
             exit_code = await self._wait_for_container_completion(container, timeout)
 
-            await self._cleanup_log_task(log_task)
-            await self._collect_remaining_logs(container, logs)
+            await self._cleanup_log_task(stdout_task)
+            await self._cleanup_log_task(stderr_task)
+            await self._cleanup_log_task(logs_task)
 
-            full_logs = '\n'.join(logs)
+            await self._collect_remaining_logs(container, stdout, stdout=True, stderr=False)
+            await self._collect_remaining_logs(container, stderr, stdout=False, stderr=True)
+            await self._collect_remaining_logs(container, logs, stdout=True, stderr=True)
 
             return ContainerResult(
                 exit_code=exit_code,
-                stdout=full_logs,
-                stderr='',
-                logs=logs,
+                stdout='\n'.join(stdout),
+                stderr='\n'.join(stderr),
+                logs='\n'.join(logs),
                 container_id=container.id
             )
-
         except Exception as e:
             logger.error(f"Error waiting for container {container.id}: {e}")
             raise
@@ -371,13 +386,23 @@ class ContainerManager:
         except asyncio.CancelledError:
             pass
 
-    async def _collect_remaining_logs(self, container, logs_buffer: list):
+    async def _collect_remaining_logs(
+            self,
+            container: docker.models.containers.Container,
+            logs_buffer: list,
+            stdout: bool = False,
+            stderr: bool = False
+        ):
         """Collect any remaining logs from the container."""
         try:
             # Check if container is still accessible and not dead/marked for removal
             container.reload()
             if container.status not in ['dead', 'removing', 'removed']:
-                remaining_logs = container.logs(stdout=True, stderr=True).decode('utf-8', errors='ignore')
+                remaining_logs = container.logs(
+                    stdout=stdout,
+                    stderr=stderr,
+                ).decode('utf-8', errors='ignore')
+
                 if remaining_logs:
                     remaining_lines = remaining_logs.strip().split('\n')
                     for line in remaining_lines:
