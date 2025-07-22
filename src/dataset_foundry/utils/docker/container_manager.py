@@ -6,15 +6,14 @@ import asyncio
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional
-from dataclasses import dataclass
 import docker
 from docker.errors import DockerException
+from pydantic import BaseModel, model_validator
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class ContainerConfig:
+class ContainerConfig(BaseModel):
     """Configuration for a Docker container."""
     image: str
     command: Optional[List[str]] = None
@@ -26,8 +25,7 @@ class ContainerConfig:
     timeout: int = 3600
 
 
-@dataclass
-class ContainerResult:
+class ContainerResult(BaseModel):
     """Result from container execution."""
     exit_code: int
     stdout: str

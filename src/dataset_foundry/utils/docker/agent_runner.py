@@ -8,7 +8,7 @@ import yaml
 import os
 from pathlib import Path
 from typing import Dict, Any, Optional, List
-from dataclasses import dataclass
+from pydantic import BaseModel
 
 from .container_manager import ContainerManager, ContainerConfig, ContainerResult
 
@@ -16,8 +16,7 @@ logger = logging.getLogger(__name__)
 agent_configs_dir = Path(__file__).parent.parent.parent / "configs" / "agents"
 
 
-@dataclass
-class AgentConfig:
+class AgentConfig(BaseModel):
     """Configuration for an agent type."""
     name: str
     image: str
@@ -28,8 +27,7 @@ class AgentConfig:
     build_args: Optional[Dict[str, str]] = None
 
 
-@dataclass
-class AgentInputs:
+class AgentInputs(BaseModel):
     """Input files for agent execution."""
     instructions_file: str
     prompt_file: str
@@ -40,8 +38,7 @@ class AgentInputs:
     repo_path: Optional[str] = None
 
 
-@dataclass
-class AgentResult:
+class AgentResult(BaseModel):
     """Result from agent execution."""
     success: bool
     exit_code: int
