@@ -12,7 +12,7 @@ from typing import Dict, Any, Optional, List
 from docker.types import Mount
 from pydantic import BaseModel
 
-from .container_manager import ContainerManager, ContainerConfig, ContainerResult
+from .container_manager import BuildConfig, ContainerManager, ContainerConfig, ContainerResult
 from ..params.resolve_environment_dict import resolve_environment_dict
 
 logger = logging.getLogger(__name__)
@@ -131,9 +131,6 @@ class AgentRunner:
 
     async def _ensure_image_built(self, stream_logs: bool = False):
         """Ensure the agent's Docker image is built."""
-        if self.container_manager.image_exists(self._config.container.image):
-            logger.info(f"Image {self._config.container.image} already exists")
-            return
 
         config = deepcopy(self._config.container.build)
         agent_config_dir = agent_configs_dir / self._config.name
@@ -144,6 +141,12 @@ class AgentRunner:
             config.context = agent_config_dir / config.context
 
         config.args = resolve_environment_dict(config.args)
+        build_required = self._image_build_required(config) # requires resolved `config`
+
+        # `build_required` can only be false if the image exists
+        if not build_required:
+            logger.info(f"Image {self._config.container.image} already exists")
+            return
 
         if config.context and Path(config.context).exists():
             await self.container_manager.build_image(
@@ -153,6 +156,37 @@ class AgentRunner:
             )
         else:
             raise ValueError(f"No context found for agent {self._config.name} at {config.context}")
+
+    def _image_build_required(self, build_config: BuildConfig) -> bool:
+        try:
+            image_name = self._config.container.image
+            last_built = self.container_manager.get_image_last_built(image_name)
+
+            if last_built is None:
+                return True
+
+            dockerfile_mtime = self._get_dockerfile_last_modified(build_config)
+
+            if not dockerfile_mtime or dockerfile_mtime > last_built:
+                return True
+
+            # TODO: If agents.yaml has `build` section that has been modified since last build,
+            #       then also we need to rebuild the image. [fastfedora 22.Jul.25]
+
+            return False
+        except Exception as e:
+            return True
+
+    def _get_dockerfile_last_modified(self, build_config: BuildConfig) -> Optional[float]:
+        """Get the last modified time of the Dockerfile."""
+        dockerfile_path = build_config.dockerfile or "Dockerfile"
+
+        if not Path(dockerfile_path).exists():
+            dockerfile_path = build_config.context / dockerfile_path
+
+        dockerfile = Path(dockerfile_path)
+
+        return dockerfile.stat().st_mtime if dockerfile.exists() else None
 
     def _prepare_container_config(
         self,

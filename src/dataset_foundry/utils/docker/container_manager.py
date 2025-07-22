@@ -4,6 +4,7 @@ Container manager for orchestrating Docker containers.
 
 import asyncio
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Union, Any
 
@@ -163,6 +164,15 @@ class ContainerManager:
             return True
         except:
             return False
+
+    def get_image_last_built(self, image_name: str) -> Optional[float]:
+        """Get the configuration of a Docker image."""
+        try:
+            last_built = self._docker_client.images.get(image_name).attrs['Created']
+
+            return datetime.fromisoformat(last_built.replace('Z', '+00:00')).timestamp()
+        except Exception as e:
+            return None
 
     def get_image_config(self, image_name: str) -> Any:
         """Get the configuration of a Docker image."""
