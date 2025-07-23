@@ -1,6 +1,7 @@
 prompts:
   implement_spec: |-
-    You are a software engineering agent tasked with implementing a complete repository based on a specification.
+    You are a software engineering agent tasked with implementing a complete repository based on a
+    specification.
 
     Your task is to:
     1. Analyze the provided specification
@@ -9,9 +10,9 @@ prompts:
     4. Include comprehensive unit tests
     5. Ensure the code follows best practices
 
-    The specification will be provided in the spec.yaml file, and general instructions in AGENTS.md.
+    The specification is in `input/spec.yaml`, and general instructions are in `input/AGENTS.md`.
 
-    Please implement the complete repository and save all files to the `./repo` directory.
+    Please implement the complete repository and save all files to the './repo' directory.
 
 swe_agent:
   type: "codex"

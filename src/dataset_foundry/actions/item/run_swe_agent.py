@@ -116,11 +116,13 @@ async def _prepare_agent_inputs(
 ) -> AgentInputs:
     """Prepare input files for the agent."""
 
-    instructions_file = output_dir / "AGENTS.md"
+    inputs_dir = output_dir / "input"
+    inputs_dir.mkdir(parents=True, exist_ok=True)
+
+    instructions_file = inputs_dir / "AGENTS.md"
     instructions_file.write_text(instructions)
 
-
-    spec_file = output_dir / "spec.yaml"
+    spec_file = inputs_dir / "spec.yaml"
     if isinstance(spec, dict):
         with open(spec_file, 'w') as f:
             yaml.dump(spec, f, default_flow_style=False)
