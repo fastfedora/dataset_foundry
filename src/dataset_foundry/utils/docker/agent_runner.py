@@ -27,8 +27,8 @@ class AgentConfig(BaseModel):
 
 class AgentInputs(BaseModel):
     """Input files for agent execution."""
+    prompt: str
     instructions_file: str
-    prompt_file: str
     spec_file: str
     output_dir: str
     item_id: str
@@ -220,12 +220,6 @@ class AgentRunner:
                 read_only=True
             ),
             Mount(
-                target=f"{inputs_dir}/PROMPT.md",
-                source=str(inputs.prompt_file),
-                type="bind",
-                read_only=True
-            ),
-            Mount(
                 target=f"{inputs_dir}/spec.yaml",
                 source=str(inputs.spec_file),
                 type="bind",
@@ -240,6 +234,7 @@ class AgentRunner:
             "ITEM_ID": inputs.item_id,
             "OUTPUT_DIR": f"{working_dir}/output",
             "CONTEXT_DATA": json.dumps(inputs.context_data),
+            "PROMPT": inputs.prompt,
         })
 
         config.environment = resolve_environment_dict(config.environment)

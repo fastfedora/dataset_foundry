@@ -119,8 +119,6 @@ async def _prepare_agent_inputs(
     instructions_file = output_dir / "AGENTS.md"
     instructions_file.write_text(instructions)
 
-    prompt_file = output_dir / "PROMPT.md"
-    prompt_file.write_text(prompt)
 
     spec_file = output_dir / "spec.yaml"
     if isinstance(spec, dict):
@@ -140,8 +138,8 @@ async def _prepare_agent_inputs(
                 shutil.copy2(repo_source, repo_dest)
 
     return AgentInputs(
+        prompt=prompt,
         instructions_file=str(instructions_file),
-        prompt_file=str(prompt_file),
         spec_file=str(spec_file),
         repo_path=str(output_dir / "repo") if repo_path else None,
         output_dir=str(output_dir),
