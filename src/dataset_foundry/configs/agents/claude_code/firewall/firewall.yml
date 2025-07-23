@@ -1,0 +1,14 @@
+allowed_domains:
+  # Python package management
+  - pypi.org
+
+  # Node.js package management
+  - registry.npmjs.org
+
+  # Anthropic services
+  - api.anthropic.com
+  - statsig.anthropic.com
+  - statsig.com
+
+  # Monitoring and error tracking
+  - sentry.io
