@@ -10,4 +10,7 @@ container:
     ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
     NODE_OPTIONS: "--max-old-space-size=4096"
     CLAUDE_CONFIG_DIR: "/home/node/.claude"
-  command: ["claude --dangerously-skip-permissions \"$PROMPT\""]
+  command: ["claude --verbose -p --output-format stream-json --dangerously-skip-permissions \"$PROMPT\""]
+
+logs:
+  format: json
