@@ -1,0 +1,13 @@
+container:
+  image: "claude-code-agent:latest"
+  build:
+    args:
+      TZ: "${TZ:-America/Los_Angeles}"
+  cap_add:
+    - NET_ADMIN
+    - NET_RAW
+  environment:
+    ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+    NODE_OPTIONS: "--max-old-space-size=4096"
+    CLAUDE_CONFIG_DIR: "/home/node/.claude"
+  command: ["claude --dangerously-skip-permissions \"$PROMPT\""]
