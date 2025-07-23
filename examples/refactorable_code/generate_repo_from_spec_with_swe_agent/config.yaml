@@ -15,7 +15,6 @@ prompts:
     Please implement the complete repository and save all files to the './repo' directory.
 
 swe_agent:
-  type: "codex"
   instructions: |-
     # Agent Instructions
 

@@ -8,6 +8,7 @@ from dataset_foundry.actions.item.save_item import save_item
 from dataset_foundry.core.key import Key
 from dataset_foundry.core.template import Template
 from dataset_foundry.core.item_pipeline import ItemPipeline
+from dataset_foundry.utils.item import omit
 
 pipeline = ItemPipeline(
     name="generate_repo_from_spec_with_swe_agent",
@@ -32,21 +33,20 @@ pipeline = ItemPipeline(
             prompt=Key("context.prompts.implement_spec"),
             spec=Key("spec"),
             output_dir=Template("{context.output_dir}/{id}"),
-            agent=Key("context.swe_agent.type"),
+            agent="codex",
             timeout=7200,  # 2 hours
             max_retries=1,
             output_key="agent_result",
             stream_logs=True,
         ),
         save_item(
-            contents=Key("agent_result_metadata"),
-            filename=Template("{id}/build-info/agent_metadata.yaml"),
+            contents=lambda item: omit(["logs"], item.data["agent_result"].model_dump()),
+            filename=Template("{id}/runs/{metadata.created_at}/result.yaml"),
             format="yaml"
         ),
         save_item(
-            contents=Key("agent_result"),
-            filename=Template("{id}/build-info/agent_result.yaml"),
-            format="yaml"
+            contents=Key("agent_result.logs"),
+            filename=Template("{id}/runs/{metadata.created_at}/agent.log"),
         ),
         log_item(message=Template("Repository generation completed for {id}")),
     ]
