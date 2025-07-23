@@ -19,10 +19,16 @@ logger = logging.getLogger(__name__)
 agent_configs_dir = Path(__file__).parent.parent.parent / "configs" / "agents"
 
 
+class AgentLogsConfig(BaseModel):
+    """Configuration for agent logs."""
+    format: Optional[str] = None
+
+
 class AgentConfig(BaseModel):
     """Configuration for an agent type."""
     name: str
     container: ContainerConfig
+    logs: Optional[AgentLogsConfig] = None
 
 
 class AgentInputs(BaseModel):
@@ -98,7 +104,10 @@ class AgentRunner:
 
             logger.info(f"Running agent {self.agent_type} (attempt {attempt})")
             container_result = await self.container_manager.run_container(
-                container_config, timeout=timeout, stream_logs=stream_logs
+                container_config,
+                timeout=timeout,
+                stream_logs=stream_logs,
+                logs_format=self._config.logs.format
             )
 
             result = self._process_container_result(container_result, inputs, output_dir)
@@ -123,6 +132,7 @@ class AgentRunner:
             return AgentConfig(
                 name=self.agent_type,
                 container=ContainerConfig(**config_data['container']),
+                logs=AgentLogsConfig(**config_data.get('logs', {})),
             )
         else:
             raise ValueError(

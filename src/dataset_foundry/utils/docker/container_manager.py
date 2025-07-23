@@ -4,6 +4,7 @@ Container manager for orchestrating Docker containers.
 
 import asyncio
 import logging
+import json
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Union, Any
@@ -245,7 +246,8 @@ class ContainerManager:
         self,
         config: ContainerConfig,
         timeout: Optional[int] = None,
-        stream_logs: bool = False
+        stream_logs: bool = False,
+        logs_format: Optional[str] = None
     ) -> ContainerResult:
         """
         Run a container with the given configuration.
@@ -254,7 +256,7 @@ class ContainerManager:
             config: Container configuration
             timeout: Optional timeout in seconds
             stream_logs: Whether to stream container logs to logger.info (default: False)
-
+            logs_format: Format of the logs to stream (default: None)
         Returns:
             ContainerResult with execution details
         """
@@ -280,7 +282,12 @@ class ContainerManager:
                 # auto_remove=config.auto_remove,
             )
 
-            return await self._wait_for_container(container, timeout or config.timeout, stream_logs)
+            return await self._wait_for_container(
+                container,
+                timeout or config.timeout,
+                stream_logs,
+                logs_format
+            )
         except DockerException as e:
             logger.error(f"Docker error: {e}")
             raise
@@ -306,7 +313,8 @@ class ContainerManager:
         self,
         container,
         timeout: int,
-        stream_logs: bool
+        stream_logs: bool,
+        logs_format: Optional[str] = None
     ) -> ContainerResult:
         """Wait for a detached container to complete while streaming logs."""
         try:
@@ -320,13 +328,13 @@ class ContainerManager:
 
             # Only print the interweaved logs; the other streams are just for collection
             logs_task = asyncio.create_task(
-                self._stream_container_logs(logs_stream, logs, container.id, stream_logs)
+                self._stream_container_logs(logs_stream, logs, container.id, stream_logs, logs_format)
             )
             stdout_task = asyncio.create_task(
-                self._stream_container_logs(stdout_stream, stdout, container.id, False)
+                self._stream_container_logs(stdout_stream, stdout, container.id, False, logs_format)
             )
             stderr_task = asyncio.create_task(
-                self._stream_container_logs(stderr_stream, stderr, container.id, False)
+                self._stream_container_logs(stderr_stream, stderr, container.id, False, logs_format)
             )
 
             exit_code = await self._wait_for_container_completion(container, timeout)
@@ -356,7 +364,8 @@ class ContainerManager:
         log_stream,
         logs_buffer: list,
         container_id: str,
-        stream_logs: bool
+        stream_logs: bool,
+        logs_format: Optional[str] = None
     ):
         """Stream logs from container in real-time."""
         try:
@@ -364,9 +373,23 @@ class ContainerManager:
                 log_line = log_chunk.decode('utf-8', errors='ignore').strip()
                 logs_buffer.append(log_line)
                 if stream_logs:
+                    if logs_format == "json":
+                        try:
+                            log_line = self._format_json_log(log_line)
+                        except:
+                            pass
+
                     logger.info(f"[Container {container_id[:12]}] {log_line}")
         except Exception as e:
             logger.warning(f"Error streaming logs: {e}")
+
+    def _format_json_log(self, log_line: str) -> str:
+        """Format a JSON log line."""
+        log_data = json.loads(log_line)
+        log_line = json.dumps(log_data, indent=2)
+        log_line = log_line.replace("\\n", "\n")
+
+        return log_line
 
     async def _wait_for_container_completion(self, container, timeout: int) -> int:
         """Wait for container to complete and return exit code."""
