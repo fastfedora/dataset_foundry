@@ -168,7 +168,10 @@ class ContainerManager:
     def get_image_last_built(self, image_name: str) -> Optional[float]:
         """Get the configuration of a Docker image."""
         try:
-            last_built = self._docker_client.images.get(image_name).attrs['Created']
+            created = self._docker_client.images.get(image_name).attrs['Created']
+            metadata = self._docker_client.images.get(image_name).attrs['Metadata']
+            last_tag_time = metadata['LastTagTime'] if metadata else None
+            last_built = last_tag_time or created
 
             return datetime.fromisoformat(last_built.replace('Z', '+00:00')).timestamp()
         except Exception as e:
@@ -343,6 +346,7 @@ class ContainerManager:
                 logs='\n'.join(logs),
                 container_id=container.id
             )
+
         except Exception as e:
             logger.error(f"Error waiting for container {container.id}: {e}")
             raise
