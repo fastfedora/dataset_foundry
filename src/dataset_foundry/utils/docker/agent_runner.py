@@ -133,7 +133,7 @@ class AgentRunner:
     async def _ensure_image_built(self, stream_logs: bool = False):
         """Ensure the agent's Docker image is built."""
 
-        config = deepcopy(self._config.container.build)
+        config = deepcopy(self._config.container.build or BuildConfig())
         agent_config_dir = agent_configs_dir / self._config.name
 
         if not config.context:
