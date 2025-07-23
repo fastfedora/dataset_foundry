@@ -38,11 +38,12 @@ class AgentInputs(BaseModel):
 
 class AgentResult(BaseModel):
     """Result from agent execution."""
+    metadata: Dict[str, Any]
+    inputs: Dict[str, Any]
     success: bool
     exit_code: int
     output_files: List[str]
     logs: str
-    metadata: Dict[str, Any]
 
 
 class AgentRunner:
@@ -100,7 +101,7 @@ class AgentRunner:
                 container_config, timeout=timeout, stream_logs=stream_logs
             )
 
-            result = self._process_container_result(container_result, output_dir, inputs.item_id)
+            result = self._process_container_result(container_result, inputs, output_dir)
 
             logger.info(f"Agent {self.agent_type} completed with exit code {result.exit_code}")
             return result
@@ -244,8 +245,8 @@ class AgentRunner:
     def _process_container_result(
         self,
         container_result: ContainerResult,
+        inputs: AgentInputs,
         output_dir: Path,
-        item_id: str
     ) -> AgentResult:
         """Process container execution result."""
 
@@ -257,17 +258,16 @@ class AgentRunner:
                     repo_files.append(str(file_path.relative_to(repo_dir)))
 
         metadata = {
-            "container_id": container_result.container_id,
-            "exit_code": container_result.exit_code,
-            "output_files": repo_files,
-            "item_id": item_id,
             "agent_type": self.agent_type,
+            "container_id": container_result.container_id,
+            "repo_dir": str(repo_dir),
         }
 
         return AgentResult(
+            metadata=metadata,
+            inputs=inputs.model_dump(),
             success=container_result.exit_code == 0,
             exit_code=container_result.exit_code,
             output_files=repo_files,
             logs=container_result.logs,
-            metadata=metadata
         )
