@@ -77,6 +77,8 @@ def run_swe_agent(
 
         for attempt in range(resolved_max_retries):
             try:
+                agent_inputs.context_data["attempt"] = attempt + 1
+
                 result = await agent_runner.run_agent(
                     inputs=agent_inputs,
                     output_dir=output_path,
@@ -94,12 +96,6 @@ def run_swe_agent(
 
         item.push({
             resolved_output_key: result,
-            f"{resolved_output_key}_metadata": {
-                "agent": resolved_agent,
-                "output_dir": str(output_path),
-                "attempts": attempt + 1,
-                "success": result is not None
-            }
         }, run_swe_agent)
 
     return run_swe_agent_action
@@ -147,6 +143,7 @@ async def _prepare_agent_inputs(
         output_dir=str(output_dir),
         item_id=item.id,
         context_data={
+            "attempt": 0,
             "id": item.id,
             **item.data,
             # TODO: Think about adding `context` in here too. [fastfedora 18.Jul.25]
