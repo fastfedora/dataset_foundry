@@ -12,18 +12,15 @@ fi
 
 read_domains_from_yaml() {
     local config_file="$1"
-    echo "Checking yq installed" >&2
     if ! command -v yq >/dev/null 2>&1; then
         echo "ERROR: yq is required to parse YAML files. Please install yq first." >&2
         echo "Install with: pip install yq or go install github.com/mikefarah/yq/v4@latest" >&2
         exit 1
     fi
-    echo "Checking config file exists: $config_file" >&2
     if [ ! -f "$config_file" ]; then
         echo "ERROR: YAML config file not found: $config_file" >&2
         exit 1
     fi
-    echo "Attempting to parse YAML file: $config_file" >&2
     yq -r '.allowed_domains[]' "$config_file" | grep -v '^$' | grep -v '^#'
 }
 
