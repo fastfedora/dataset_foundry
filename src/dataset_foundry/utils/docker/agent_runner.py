@@ -50,6 +50,8 @@ class AgentResult(BaseModel):
     exit_code: int
     output_files: List[str]
     logs: str
+    stdout: str
+    stderr: str
 
 
 class AgentRunner:
@@ -280,4 +282,6 @@ class AgentRunner:
             exit_code=container_result.exit_code,
             output_files=repo_files,
             logs=container_result.logs,
+            stdout=container_result.stdout,
+            stderr=container_result.stderr,
         )
