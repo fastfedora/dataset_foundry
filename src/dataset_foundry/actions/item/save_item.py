@@ -19,7 +19,7 @@ def save_item(
     async def save_item_action(item: DatasetItem, context: Context):
         resolved_dir = resolve_item_value(dir, item, context, required_as="dir")
         resolved_filename = resolve_item_value(filename, item, context, required_as="filename")
-        resolved_contents = resolve_item_value(contents, item, context) or item.data
+        resolved_contents = resolve_item_value(contents, item, context) or '' if contents else item.data
         resolved_format = resolve_item_value(format, item, context)
 
         if resolved_format == "auto":
