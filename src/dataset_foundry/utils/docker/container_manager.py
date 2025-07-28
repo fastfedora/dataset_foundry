@@ -343,10 +343,6 @@ class ContainerManager:
             await self._cleanup_log_task(stdout_task)
             await self._cleanup_log_task(stderr_task)
 
-            await self._collect_remaining_logs(container, logs, stdout=True, stderr=True)
-            await self._collect_remaining_logs(container, stdout, stdout=True, stderr=False)
-            await self._collect_remaining_logs(container, stderr, stdout=False, stderr=True)
-
             return ContainerResult(
                 exit_code=exit_code,
                 stdout='\n'.join(stdout),
@@ -411,30 +407,4 @@ class ContainerManager:
         try:
             await log_task
         except asyncio.CancelledError:
-            pass
-
-    async def _collect_remaining_logs(
-            self,
-            container: docker.models.containers.Container,
-            logs_buffer: list,
-            stdout: bool = False,
-            stderr: bool = False
-        ):
-        """Collect any remaining logs from the container."""
-        try:
-            # Check if container is still accessible and not dead/marked for removal
-            container.reload()
-            if container.status not in ['dead', 'removing', 'removed']:
-                remaining_logs = container.logs(
-                    stdout=stdout,
-                    stderr=stderr,
-                ).decode('utf-8', errors='ignore')
-
-                if remaining_logs:
-                    remaining_lines = remaining_logs.strip().split('\n')
-                    for line in remaining_lines:
-                        logs_buffer.append(line)
-        except Exception as e:
-            print(f"Could not get remaining logs for container {container.id}: {e}")
-            # Container might have been removed or is inaccessible
             pass
