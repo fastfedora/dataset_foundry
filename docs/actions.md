@@ -139,6 +139,9 @@ Runs unit tests for a data item.
 - `filename` (Union[Callable,Key,str]): Name of the test file
 - `dir` (Union[Callable,Key,str]): Directory containing the test file (default: `Key("context.input_dir")`)
 - `property` (Union[Callable,Key,str]): Property to store test results under (default: "test_result")
+- `sandbox` (Union[Callable,Key,str], optional): Sandbox configuration to use for isolated test execution
+- `stream_logs` (Union[Callable,Key,bool]): Whether to stream container logs (default: False)
+- `timeout` (Union[Callable,Key,int]): Timeout for execution in seconds (default: 300)
 
 ### `save_item`
 Saves a data item to a file.
