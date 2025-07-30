@@ -64,7 +64,7 @@ class AgentRunner(BaseRunner):
         """
         super().__init__(agent_type, "agents", "agent.yml", container_manager)
 
-    async def run_agent(
+    async def run(
         self,
         inputs: AgentInputs,
         output_dir: Path,

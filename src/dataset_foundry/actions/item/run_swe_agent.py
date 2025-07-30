@@ -79,7 +79,7 @@ def run_swe_agent(
             try:
                 agent_inputs.context_data["attempt"] = attempt + 1
 
-                result = await agent_runner.run_agent(
+                result = await agent_runner.run(
                     inputs=agent_inputs,
                     output_dir=output_path,
                     timeout=resolved_timeout,
