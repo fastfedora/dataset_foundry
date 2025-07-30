@@ -70,10 +70,17 @@ class SandboxRunner(BaseRunner):
             )
 
             logger.info(f"Running sandbox {self.runner_name}")
-            result = await self.container_manager.run_container(
+            container_result = await self.container_manager.run_container(
                 container_config,
                 timeout=timeout,
                 stream_logs=stream_logs
+            )
+            result = SandboxResult(
+                exit_code=container_result.exit_code,
+                stdout=container_result.stdout,
+                stderr=container_result.stderr,
+                logs=container_result.logs,
+                container_id=container_result.container_id
             )
 
             logger.info(f"Sandbox {self.runner_name} completed with exit code {result.exit_code}")
