@@ -16,7 +16,15 @@ RUN pip install --no-cache-dir \
 
 # Create a non-root user for security
 RUN useradd --create-home --shell /bin/bash guest
+
+# Copy the init script
+COPY init.sh /usr/local/bin/init.sh
+RUN chmod +x /usr/local/bin/init.sh
+
 USER guest
+
+# Install dependencies, if needed
+ENTRYPOINT ["sh", "-c", "/usr/local/bin/init.sh && bash -c \"$*\"", "--"]
 
 # Default command (can be overridden)
 CMD ["python"]
