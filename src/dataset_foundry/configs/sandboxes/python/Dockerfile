@@ -21,6 +21,9 @@ RUN useradd --create-home --shell /bin/bash guest
 COPY init.sh /usr/local/bin/init.sh
 RUN chmod +x /usr/local/bin/init.sh
 
+# Change ownership of workspace directory to guest user
+RUN chown -R guest:guest /workspace
+
 USER guest
 
 # Install dependencies, if needed
