@@ -5,16 +5,8 @@ from ...core.context import Context
 from ...core.dataset_item import DatasetItem
 from ...core.key import Key
 from ...types.item_action import ItemAction
+from ...utils.get_pipeline_metadata import get_pipeline_metadata
 from ...utils.params.resolve_item_value import resolve_item_value
-
-def get_pipeline_metadata(context: Context) -> dict:
-    parent_metadata = get_pipeline_metadata(context.parent) if context.parent else None
-
-    return {
-        "name": context.pipeline.name,
-        **context.pipeline.metadata,
-        **({ "parent": parent_metadata } if parent_metadata else {}),
-    }
 
 def set_item_metadata(
         property: Union[Callable,Key,str] = "metadata",
