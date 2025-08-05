@@ -317,6 +317,10 @@ class ContainerManager:
         logs_format: Optional[str] = None
     ) -> ContainerResult:
         """Wait for a detached container to complete while streaming logs."""
+        logs_task = None
+        stdout_task = None
+        stderr_task = None
+
         try:
             # Collect each stream in a separate buffer, plus an interweaved buffer for full logs
             logs = []
@@ -339,10 +343,6 @@ class ContainerManager:
 
             exit_code = await self._wait_for_container_completion(container, timeout)
 
-            await self._cleanup_log_task(logs_task)
-            await self._cleanup_log_task(stdout_task)
-            await self._cleanup_log_task(stderr_task)
-
             return ContainerResult(
                 exit_code=exit_code,
                 stdout='\n'.join(stdout),
@@ -354,6 +354,14 @@ class ContainerManager:
         except Exception as e:
             logger.error(f"Error waiting for container {container.id}: {e}")
             raise
+        finally:
+            # Always clean up log tasks, even if there was an exception or timeout
+            if logs_task:
+                await self._cleanup_log_task(logs_task)
+            if stdout_task:
+                await self._cleanup_log_task(stdout_task)
+            if stderr_task:
+                await self._cleanup_log_task(stderr_task)
 
     async def _stream_container_logs(
         self,
