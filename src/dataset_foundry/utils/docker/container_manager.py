@@ -16,6 +16,12 @@ from pydantic import BaseModel, model_validator
 
 logger = logging.getLogger(__name__)
 
+# Codes returned from `timeout` command indicating a timeout occurred
+EXIT_CODE_TIMEOUT = 124
+EXIT_CODE_SIGKILL = 137
+
+# Buffer time in seconds to add to the container timeout to allow the `timeout` command to execute
+TIMEOUT_BUFFER = 10
 
 class BuildConfig(BaseModel):
     """Configuration for building a Docker image."""
@@ -261,12 +267,14 @@ class ContainerManager:
             ContainerResult with execution details
         """
         container = None
+        timeout = timeout or config.timeout
+
         try:
             logger.debug(f"Running container {config.image} with command {config.command}")
 
             container = self._docker_client.containers.run(
                 image=config.image,
-                command=config.command,
+                command=["timeout", f"{timeout}s"] + config.command,
                 entrypoint=config.entrypoint,
                 user=config.user,
                 environment=config.environment,
@@ -282,9 +290,11 @@ class ContainerManager:
                 # auto_remove=config.auto_remove,
             )
 
+            # NOTE: We add a buffer to the timeout to allow the `timeout` command to execute
+            #       before the container is killed. [fastfedora 5.Aug.25]
             return await self._wait_for_container(
                 container,
-                timeout or config.timeout,
+                timeout + TIMEOUT_BUFFER,
                 stream_logs,
                 logs_format
             )
@@ -342,6 +352,17 @@ class ContainerManager:
             )
 
             exit_code = await self._wait_for_container_completion(container, timeout)
+
+            # Detect if timeout occurred
+            if exit_code == EXIT_CODE_TIMEOUT or exit_code == EXIT_CODE_SIGKILL:
+                if exit_code == EXIT_CODE_TIMEOUT:
+                    message = f"Process timed out and shutdown gracefully"
+                else:
+                    message = f"Process timed out and was killed by the system"
+
+                logger.warning(f"{message} in container {container.id} (exit code: {exit_code})")
+                stderr.append(f"WARNING: {message}")
+                logs.append(f"WARNING: {message}")
 
             return ContainerResult(
                 exit_code=exit_code,
