@@ -15,18 +15,23 @@ logger = logging.getLogger(__name__)
 def load_dataset(
         filename: Union[Callable,Key,str] = "dataset.yaml",
         dir: Union[Callable,Key,str] = Key("context.input_dir"),
+        items_key: Union[Callable,Key,str] = None,
         property: Union[Callable,Key,str] = None,
         id_generator: Callable = lambda index, _data: f"{index+1:03d}",
     ) -> DatasetAction:
     async def load_dataset_action(dataset: Dataset, context: Context):
         resolved_dir = resolve_dataset_value(dir, dataset, context, required_as="dir")
         resolved_file = resolve_dataset_value(filename, dataset, context, required_as="filename")
+        resolved_items_key = resolve_dataset_value(items_key, dataset, context)
         resolved_property = resolve_dataset_value(property, dataset, context)
 
         path = resolved_dir / resolved_file
         logger.debug(f"Loading data from {path}")
         with open(path) as file:
             dataset_items = yaml.safe_load(file)
+
+        if resolved_items_key:
+            dataset_items = dataset_items[resolved_items_key]
 
         if not isinstance(dataset_items, list):
             raise ValueError(f"The dataset at {path} must be a list")
