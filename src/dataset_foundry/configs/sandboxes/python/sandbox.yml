@@ -1,4 +1,4 @@
-name: python-sandbox2
+name: python-sandbox
 container:
   image: python-sandbox:latest
   build:
