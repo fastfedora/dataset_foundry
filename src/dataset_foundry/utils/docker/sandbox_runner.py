@@ -110,6 +110,4 @@ class SandboxRunner(BaseRunner):
         ])
         self._prepare_environment_config(config)
 
-        print("\n\nconfig:", config.volumes)
-
         return config

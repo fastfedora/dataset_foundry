@@ -80,7 +80,7 @@ class BaseRunner:
             with open(config_path, 'r') as f:
                 config_data = yaml.safe_load(f)
 
-            logger.info(f"Loaded agent configuration from {config_path}")
+            logger.info(f"Loaded configuration from {config_path}")
 
             return self._parse_config(config_data)
         else:
