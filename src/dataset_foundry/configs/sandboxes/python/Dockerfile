@@ -12,6 +12,9 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /workspace
 
+# Quiet warning about new pip release
+RUN pip install --upgrade pip
+
 # Install Python testing dependencies
 RUN pip install --no-cache-dir \
     pytest \
