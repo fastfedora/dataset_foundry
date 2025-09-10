@@ -24,9 +24,21 @@ RUN apt-get update && apt-get install -y less \
   jq \
   yq
 
-# Install packages the agent might need
-RUN apt-get install -y pip \
-  python3.11-venv
+# Install Python globally along with modules commonly used for development
+RUN set -eu; \
+  apt-get update; \
+  apt-get install -y --no-install-recommends \
+    python3.11 \
+    python3.11-dev \
+    python3.11-venv \
+    python3-pip \
+    python3-pytest \
+    python3-pytest-cov; \
+  rm -rf /var/lib/apt/lists/*;
+
+# Create python symlink for compatibility
+RUN ln -sf /usr/bin/python3.11 /usr/bin/python && \
+  ln -sf /usr/bin/pip3 /usr/bin/pip
 
 # Ensure default node user has access to /usr/local/share
 RUN mkdir -p /usr/local/share/npm-global && \
