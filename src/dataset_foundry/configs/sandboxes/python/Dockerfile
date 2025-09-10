@@ -7,6 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE="1"
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
