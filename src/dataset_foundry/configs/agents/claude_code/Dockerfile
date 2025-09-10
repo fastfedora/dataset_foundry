@@ -8,21 +8,25 @@ ENV PYTHONUNBUFFERED="1"
 ENV PYTHONDONTWRITEBYTECODE="1"
 
 # Install basic development tools and iptables/ipset
-RUN apt-get update && apt-get install -y less \
-  git \
-  procps \
-  sudo \
-  man-db \
-  unzip \
-  gnupg2 \
-  gh \
-  iptables \
-  ipset \
-  iproute2 \
-  dnsutils \
-  aggregate \
-  jq \
-  yq
+RUN set -eu; \
+  apt-get update; \
+  apt-get install -y --no-install-recommends \
+    less \
+    git \
+    procps \
+    sudo \
+    man-db \
+    unzip \
+    gnupg2 \
+    gh \
+    iptables \
+    ipset \
+    iproute2 \
+    dnsutils \
+    aggregate \
+    jq \
+    yq; \
+  rm -rf /var/lib/apt/lists/*;
 
 # Install Python globally along with modules commonly used for development
 RUN set -eu; \
