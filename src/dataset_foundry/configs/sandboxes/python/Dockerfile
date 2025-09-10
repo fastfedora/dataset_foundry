@@ -1,5 +1,9 @@
 FROM python:3.11-slim
 
+# Avoid buffering stdout and stderr and disable creating `__pycache__` directories
+ENV PYTHONUNBUFFERED="1"
+ENV PYTHONDONTWRITEBYTECODE="1"
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \

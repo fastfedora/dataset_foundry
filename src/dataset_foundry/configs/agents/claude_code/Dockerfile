@@ -3,6 +3,10 @@ FROM node:20
 ARG TZ
 ENV TZ="$TZ"
 
+# Avoid buffering stdout and stderr and disable creating `__pycache__` directories
+ENV PYTHONUNBUFFERED="1"
+ENV PYTHONDONTWRITEBYTECODE="1"
+
 # Install basic development tools and iptables/ipset
 RUN apt-get update && apt-get install -y less \
   git \
