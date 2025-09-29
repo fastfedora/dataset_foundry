@@ -4,7 +4,7 @@ Container manager for orchestrating Docker containers.
 
 import asyncio
 import logging
-import json
+import datason.json as json
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Union, Any

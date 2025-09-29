@@ -1,4 +1,4 @@
-import json
+import datason.json as json
 import logging
 from typing import Callable, Literal, Optional, Union
 import yaml
