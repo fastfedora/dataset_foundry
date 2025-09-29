@@ -87,14 +87,14 @@ def example_function():
 
         # Mock the image building
         with patch.object(sandbox_runner, '_ensure_image_built'):
-        # Run tests
-        result = await sandbox_runner.run(
-            target_file=test_file,
-            workspace_dir=tmp_path,
-            command=["python", "-m", "pytest", "-v", test_file.name],
-            timeout=300,
-            stream_logs=False
-        )
+            # Run tests
+            result = await sandbox_runner.run(
+                target_file=test_file,
+                workspace_dir=tmp_path,
+                command=["python", "-m", "pytest", "-v", test_file.name],
+                timeout=300,
+                stream_logs=False
+            )
 
         # Verify result
         assert isinstance(result, SandboxResult)
