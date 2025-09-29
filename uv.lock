@@ -138,6 +138,7 @@ name = "dataset-foundry"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "datason" },
     { name = "docker" },
     { name = "langchain" },
     { name = "langchain-anthropic" },
@@ -153,6 +154,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "datason", specifier = ">=0.13.0" },
     { name = "docker", specifier = ">=7.1.0" },
     { name = "langchain", specifier = "==0.3.21" },
     { name = "langchain-anthropic", specifier = "==0.3.10" },
@@ -164,6 +166,15 @@ requires-dist = [
     { name = "python-dotenv", specifier = "==1.0.1" },
     { name = "pyyaml", specifier = "==6.0.2" },
     { name = "toolz", specifier = ">=1.0.0" },
+]
+
+[[package]]
+name = "datason"
+version = "0.13.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ff/9a/3f80f36831fd002a4cd02f609c940b50a697b9bd1f533595a8063f9057b9/datason-0.13.0.tar.gz", hash = "sha256:ac3ba69586501fe8d6cf039d75ecaf5659bc16ff089d71f60d73e398505900dd", size = 511930 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/18/04/1dc0c30a511736f075f37162573b23da7102c643419865a2a96fa27434f1/datason-0.13.0-py3-none-any.whl", hash = "sha256:7ea24bd73ec04a9ea0a23b15061c94e4f62838c465f8205c4bf5e2a91de458cc", size = 129970 },
 ]
 
 [[package]]
