@@ -120,8 +120,18 @@ class AgentRunner(BaseRunner):
         working_dir = self._get_working_dir(config)
         inputs_dir = Path(working_dir) / "input"
 
+        # Write prompt to a file to avoid issues when the prompt is too long
+        prompt_file = output_dir / "input" / "prompt.md"
+        prompt_file.write_text(inputs.prompt)
+
         self._prepare_volumes_config(config, [
             Mount(target=working_dir, source=str(output_dir), type="bind", read_only=False),
+            Mount(
+                target=f"{inputs_dir}/prompt.md",
+                source=str(prompt_file),
+                type="bind",
+                read_only=True
+            ),
             Mount(
                 target=f"{inputs_dir}/AGENTS.md",
                 source=str(inputs.instructions_file),
@@ -139,7 +149,6 @@ class AgentRunner(BaseRunner):
             "ITEM_ID": inputs.item_id,
             "OUTPUT_DIR": f"{working_dir}/output",
             "CONTEXT_DATA": json.dumps(inputs.context_data),
-            "PROMPT": inputs.prompt,
         })
 
         return config
