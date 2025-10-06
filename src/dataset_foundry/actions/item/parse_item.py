@@ -1,5 +1,5 @@
 from typing import Callable, Optional, Union
-import json
+import datason.json as json
 import yaml
 
 from ...core.context import Context

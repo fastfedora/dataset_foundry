@@ -1,4 +1,4 @@
-import json
+import datason.json as json
 from pathlib import Path
 import textwrap
 from typing import Any, List, Union

@@ -8,12 +8,15 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "datason>=0.13.0",
+    "docker>=7.1.0",
     "langchain==0.3.21",
     "langchain-anthropic==0.3.10",
     "langchain-core==0.3.45",
     "langchain-openai==0.3.9",
     "pydantic>=2.10.6",
     "pytest>=8.3.4",
+    "pytest-asyncio>=1.0.0",
     "python-dotenv==1.0.1",
     "PyYAML==6.0.2",
     "toolz>=1.0.0",

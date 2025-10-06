@@ -1,0 +1,16 @@
+container:
+  image: "claude-code-agent:latest"
+  build:
+    args:
+      TZ: "${TZ:-America/Los_Angeles}"
+  cap_add:
+    - NET_ADMIN
+    - NET_RAW
+  environment:
+    ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+    NODE_OPTIONS: "--max-old-space-size=4096"
+    CLAUDE_CONFIG_DIR: "/home/node/.claude"
+  command: ["cat input/prompt.md | claude --verbose -p --output-format stream-json --dangerously-skip-permissions"]
+
+logs:
+  format: json

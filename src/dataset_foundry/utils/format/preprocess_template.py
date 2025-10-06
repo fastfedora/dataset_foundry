@@ -1,6 +1,6 @@
 import re
 import yaml
-import json
+import datason.json as json
 from typing import Any, Dict, Tuple, Optional
 
 from ...utils.get import get

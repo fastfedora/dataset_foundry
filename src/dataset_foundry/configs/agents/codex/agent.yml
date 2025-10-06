@@ -1,0 +1,5 @@
+container:
+  image: "codex-agent:latest"
+  environment:
+    OPENAI_API_KEY: "${OPENAI_API_KEY}"
+  entrypoint: ["bash", "-c", "cat input/prompt.md | codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check"]

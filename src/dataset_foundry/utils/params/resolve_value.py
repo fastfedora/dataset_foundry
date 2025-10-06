@@ -1,5 +1,4 @@
 import logging
-from toolz import get_in
 from typing import Any, Callable, Optional, Union
 
 from ...core.context import Context
@@ -31,7 +30,7 @@ def resolve_value(
         else:
             resolved_value = value
 
-    if required_as and not resolved_value:
+    if required_as and (resolved_value is None or resolved_value == ""):
         raise ValueError(f"'{required_as}' must be passed in or defined in the data or context")
 
     logger.debug(
