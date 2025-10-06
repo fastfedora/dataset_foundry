@@ -1,8 +1,10 @@
 import logging
+import anyio
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from ..types.item_action import ItemAction
+from ..types.item_pipeline_options import ItemPipelineOptions
 from .dataset import Dataset
 from .dataset_item import DatasetItem
 from .context import Context
@@ -21,9 +23,10 @@ class ItemPipeline(Pipeline):
             steps: List[ItemAction],
             name: Optional[str] = None,
             config: Optional[Path|str|dict] = {},
+            options: Optional[Union[ItemPipelineOptions, dict]] = None,
             metadata: Optional[dict] = {},
             setup: Optional[List[PipelineAction]] = None,
-            teardown: Optional[List[PipelineAction]] = None
+            teardown: Optional[List[PipelineAction]] = None,
         ):
         """
         Initialize the item pipeline.
@@ -45,6 +48,12 @@ class ItemPipeline(Pipeline):
             teardown=teardown
         )
         self._steps = steps
+        if isinstance(options, dict):
+            self.options = ItemPipelineOptions(**options)
+        elif isinstance(options, ItemPipelineOptions):
+            self.options = options
+        else:
+            self.options = ItemPipelineOptions()
 
     async def execute(self, dataset: Optional[Dataset], context: Optional[Context]) -> None:
         """
@@ -54,9 +63,21 @@ class ItemPipeline(Pipeline):
             dataset (Dataset): The dataset to process.
             context (Context): The context to use for processing.
         """
-        logger.info(f"Processing {len(dataset.items)} dataset items")
-        for item in dataset.items:
-            await self.process_data_item(item, context)
+        logger.info(f"Processing {len(dataset.items)} dataset items (concurrency: {self.options.max_concurrent_items})")
+
+        limiter = anyio.CapacityLimiter(self.options.max_concurrent_items)
+
+        async def process_with_limit(data_item: DatasetItem):
+            await limiter.acquire()
+            try:
+                await self.process_data_item(data_item, context)
+            finally:
+                limiter.release()
+
+        if dataset.items:
+            async with anyio.create_task_group() as tg:
+                for item in dataset.items:
+                    tg.start_soon(process_with_limit, item)
 
     async def process_data_item(self, item: Optional[DatasetItem], context: Optional[Context]):
         for action in self._steps:
