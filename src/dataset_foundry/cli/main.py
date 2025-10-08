@@ -10,6 +10,7 @@ from ..utils.params.parse_dir_arg import parse_dir_arg
 from .config import DATASET_DIR, LOG_DIR
 from .config import DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, DEFAULT_NUM_SAMPLES
 from .advanced_argparse import AdvancedArgumentParser
+from ..displays.get_display import get_display
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +84,14 @@ async def main_cli():
         help=f"Temperature for generation (default: {DEFAULT_MODEL_TEMPERATURE})"
     )
     parser.add_argument(
+        "--display",
+        type=str,
+        env="DF_DISPLAY",
+        default="log",
+        choices=["log", "none"],
+        help="Type of display to use for logging output (default: log)"
+    )
+    parser.add_argument(
         "-P",
         action="append",
         type=lambda x: dict(item.split("=") for item in x.split(",") if "=" in item),
@@ -91,13 +100,10 @@ async def main_cli():
     )
 
     args = vars(parser.parse_args())
+    log_level = getattr(logging, args["log_level"].upper())
 
-    logging.basicConfig(
-        level=getattr(logging, args["log_level"].upper()),
-        # format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        format='%(levelname)s: %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
+    display = get_display(args["display"])
+    display.setup_logging(log_level=log_level)
 
     args["input_dir"] = parse_dir_arg(args["input_dir"], DATASET_DIR / args["dataset"], False)
     args["output_dir"] = parse_dir_arg(args["output_dir"], DATASET_DIR / args["dataset"], True)
@@ -114,9 +120,9 @@ async def main_cli():
         pipeline_parameters.update(param_dict)
 
     module = import_module(args["pipeline"])
-
     logger.info(f"Loaded pipeline: {args['pipeline']}")
-    await module.pipeline.run(params={ **args, **pipeline_parameters })
+
+    await display.run_pipeline(module.pipeline, params={ **args, **pipeline_parameters })
 
 def main():
     asyncio.run(main_cli())
