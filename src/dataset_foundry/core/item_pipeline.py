@@ -5,6 +5,7 @@ from typing import List, Optional, Union
 
 from ..types.item_action import ItemAction
 from ..types.item_pipeline_options import ItemPipelineOptions
+from .pipeline_service import pipeline_service
 from .dataset import Dataset
 from .dataset_item import DatasetItem
 from .context import Context
@@ -70,7 +71,13 @@ class ItemPipeline(Pipeline):
         async def process_with_limit(data_item: DatasetItem):
             await limiter.acquire()
             try:
-                await self.process_data_item(data_item, context)
+                info = pipeline_service.start_item(data_item)
+                try:
+                    await self.process_data_item(data_item, context)
+                    pipeline_service.stop_item(info, status="success")
+                except Exception:
+                    pipeline_service.stop_item(info, status="error")
+                    raise
             finally:
                 limiter.release()
 

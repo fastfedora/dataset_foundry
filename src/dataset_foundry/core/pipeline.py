@@ -6,6 +6,7 @@ from typing import List, Optional, TypeAlias
 from ..types.dataset_action import DatasetAction
 from .config import Config
 from .dataset import Dataset
+from .pipeline_service import pipeline_service
 
 logger = logging.getLogger(__name__)
 
@@ -99,9 +100,24 @@ class Pipeline(ABC):
         if self.name:
             logger.info(f"Running pipeline: {self.name}")
 
+        execution_token = None
+
+        # TODO: Think about whether `setup` should be considered part of the pipeline execution.
+        #       Currently because we're using pipeline service to monitor items that are sometimes
+        #       generated during the setup, we're starting the pipeline after the setup. However,
+        #       this prevents listening to setup events. Another approach may be to call the
+        #       pipeline service for each stage in the execution (setup, execute, teardown).
+        #       [fastfedora 9.Oct.25]
         await self.setup(dataset, context)
-        await self.execute(dataset, context)
-        await self.teardown(dataset, context)
+
+        try:
+            execution_token = pipeline_service.start_pipeline(self, dataset, context)
+
+            await self.execute(dataset, context)
+            await self.teardown(dataset, context)
+        finally:
+            if execution_token:
+                pipeline_service.stop_pipeline(execution_token)
 
         return dataset
 
