@@ -20,6 +20,7 @@ dependencies = [
     "pytest-asyncio>=1.0.0",
     "python-dotenv==1.0.1",
     "PyYAML==6.0.2",
+    "textual>=6.2.0",
     "toolz>=1.0.0",
 ]
 
