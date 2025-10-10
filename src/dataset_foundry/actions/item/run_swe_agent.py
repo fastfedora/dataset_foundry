@@ -150,8 +150,5 @@ async def _prepare_agent_inputs(
         item_id=item.id,
         context_data={
             "attempt": 0,
-            "id": item.id,
-            **item.data,
-            # TODO: Think about adding `context` in here too. [fastfedora 18.Jul.25]
         }
     )
