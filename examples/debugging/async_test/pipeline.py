@@ -16,9 +16,6 @@ pipeline = ItemPipeline(
         "author": "fastfedora",
         "description": "Generate scenarios and run an async log counter for each one",
     },
-    options={
-        "max_concurrent_items": 3,
-    },
     setup=[
         if_dataset('not path_exists(f"{context.output_dir}/scenarios.yaml")', [
             run_pipeline(pipeline=f"{root_module}.generate_scenarios.pipeline"),

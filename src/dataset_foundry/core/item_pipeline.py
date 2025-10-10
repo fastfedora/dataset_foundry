@@ -1,10 +1,9 @@
 import logging
 import anyio
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from ..types.item_action import ItemAction
-from ..types.item_pipeline_options import ItemPipelineOptions
 from .pipeline_service import pipeline_service
 from .dataset import Dataset
 from .dataset_item import DatasetItem
@@ -24,7 +23,6 @@ class ItemPipeline(Pipeline):
             steps: List[ItemAction],
             name: Optional[str] = None,
             config: Optional[Path|str|dict] = {},
-            options: Optional[Union[ItemPipelineOptions, dict]] = None,
             metadata: Optional[dict] = {},
             setup: Optional[List[PipelineAction]] = None,
             teardown: Optional[List[PipelineAction]] = None,
@@ -49,12 +47,6 @@ class ItemPipeline(Pipeline):
             teardown=teardown
         )
         self._steps = steps
-        if isinstance(options, dict):
-            self.options = ItemPipelineOptions(**options)
-        elif isinstance(options, ItemPipelineOptions):
-            self.options = options
-        else:
-            self.options = ItemPipelineOptions()
 
     async def execute(self, dataset: Optional[Dataset], context: Optional[Context]) -> None:
         """
@@ -64,9 +56,10 @@ class ItemPipeline(Pipeline):
             dataset (Dataset): The dataset to process.
             context (Context): The context to use for processing.
         """
-        logger.info(f"Processing {len(dataset.items)} dataset items (concurrency: {self.options.max_concurrent_items})")
+        max_concurrent_items = context.params.get("max_concurrent_items", 1)
+        limiter = anyio.CapacityLimiter(max_concurrent_items)
 
-        limiter = anyio.CapacityLimiter(self.options.max_concurrent_items)
+        logger.info(f"Processing {len(dataset.items)} dataset items (concurrency: {max_concurrent_items})")
 
         async def process_with_limit(data_item: DatasetItem):
             await limiter.acquire()

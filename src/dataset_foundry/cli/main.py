@@ -12,6 +12,7 @@ from ..utils.params.parse_dir_arg import parse_dir_arg
 from .advanced_argparse import AdvancedArgumentParser
 from .config import DATASET_DIR, LOG_DIR
 from .config import DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, DEFAULT_NUM_SAMPLES
+from .config import DEFAULT_MAX_CONCURRENT_ITEMS
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +94,13 @@ async def main_cli():
         help="Type of display to use for logging output (default: full)"
     )
     parser.add_argument(
+        "--max-items",
+        type=int,
+        env="DF_MAX_ITEMS",
+        default=DEFAULT_MAX_CONCURRENT_ITEMS,
+        help=f"Maximum number of items to process concurrently"
+    )
+    parser.add_argument(
         "-P",
         action="append",
         type=lambda x: dict(item.split("=") for item in x.split(",") if "=" in item),
@@ -115,7 +123,9 @@ async def main_cli():
         temperature=args["temperature"]
     )
 
-    pipeline_parameters = {}
+    pipeline_parameters = {
+        "max_concurrent_items": args["max_items"],
+    }
     parameter_list = args.pop("pipeline_parameters", []) or []
     for param_dict in parameter_list:
         pipeline_parameters.update(param_dict)
