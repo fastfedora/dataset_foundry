@@ -1,18 +1,17 @@
 import asyncio
-from datetime import datetime
 import logging
 import signal
 import sys
+from datetime import datetime
 from pathlib import Path
 
 from ..core.model import Model
+from ..displays.get_display import get_display
 from ..utils.imports.import_module import import_module
 from ..utils.params.parse_dir_arg import parse_dir_arg
-
+from .advanced_argparse import AdvancedArgumentParser
 from .config import DATASET_DIR, LOG_DIR
 from .config import DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, DEFAULT_NUM_SAMPLES
-from .advanced_argparse import AdvancedArgumentParser
-from ..displays.get_display import get_display
 
 logger = logging.getLogger(__name__)
 
