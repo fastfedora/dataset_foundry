@@ -3,7 +3,7 @@ from textual.reactive import reactive
 
 from ....core.pipeline_service import pipeline_service
 from ....types.dataset_item_execution_info import DatasetItemExecutionInfo
-from ....utils.collections import find_first
+from ....utils.collections.find_first import find_first
 from ..safe_ui.list_view import SafeUiListView
 
 
