@@ -87,9 +87,9 @@ async def main_cli():
         "--display",
         type=str,
         env="DF_DISPLAY",
-        default="log",
-        choices=["log", "none"],
-        help="Type of display to use for logging output (default: log)"
+        default="full",
+        choices=["full", "log", "none"],
+        help="Type of display to use for logging output (default: full)"
     )
     parser.add_argument(
         "-P",
