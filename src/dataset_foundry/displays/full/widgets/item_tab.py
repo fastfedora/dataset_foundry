@@ -41,7 +41,9 @@ class ItemTab(ListItem):
         self.refresh()
 
     def _get_label_text(self, info: DatasetItemExecutionInfo) -> str:
-        emoji = STATUS_EMOJI.get(info.status, STATUS_EMOJI["created"])
+        data = info.item.data
+        status = data.get("display_status") or info.status
+        emoji = data.get("display_emoji") or STATUS_EMOJI.get(status, STATUS_EMOJI["created"])
         return f"{emoji}\N{NO-BREAK SPACE}{info.id}"
 
 # -------------------------------------------------------------------------------------------------
