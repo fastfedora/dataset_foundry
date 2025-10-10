@@ -4,6 +4,8 @@ Container manager for orchestrating Docker containers.
 
 import asyncio
 import logging
+import queue
+import threading
 import datason.json as json
 from datetime import datetime
 from pathlib import Path
@@ -393,20 +395,73 @@ class ContainerManager:
         logs_format: Optional[str] = None
     ):
         """Stream logs from container in real-time."""
-        try:
-            for log_chunk in log_stream:
-                log_line = log_chunk.decode('utf-8', errors='ignore').strip()
-                logs_buffer.append(log_line)
-                if stream_logs:
-                    if logs_format == "json":
-                        try:
-                            log_line = self._format_json_log(log_line)
-                        except:
-                            pass
+        # Create a queue for thread-safe communication, which is required to run SWE agents when
+        # using the full display.
+        log_queue = queue.Queue()
+        stop_event = threading.Event()
+        reader_thread = None
 
-                    logger.info(f"[Container {container_id[:12]}] {log_line}")
+        def _read_log_stream():
+            """Read the blocking log stream in a thread and put lines in queue."""
+            try:
+                for log_chunk in log_stream:
+                    if stop_event.is_set():
+                        break
+                    log_line = log_chunk.decode('utf-8', errors='ignore').strip()
+                    log_queue.put(log_line)
+                # Signal end of stream
+                log_queue.put(None)
+            except Exception as e:
+                logger.warning(f"Error reading log stream: {e}")
+                log_queue.put(None)
+
+        try:
+            # Start the blocking reader in a thread
+            reader_thread = threading.Thread(target=_read_log_stream, daemon=True)
+            reader_thread.start()
+
+            # Process logs as they arrive
+            while True:
+                try:
+                    # Wait for a log line with a short timeout
+                    log_line = await asyncio.to_thread(log_queue.get, timeout=0.1)
+
+                    if log_line is None:
+                        # End of stream
+                        break
+
+                    logs_buffer.append(log_line)
+                    if stream_logs:
+                        if logs_format == "json":
+                            try:
+                                log_line = self._format_json_log(log_line)
+                            except:
+                                pass
+
+                        logger.info(f"[Container {container_id[:12]}] {log_line}")
+
+                except queue.Empty:
+                    # No log line available yet, continue waiting
+                    continue
+                except Exception as e:
+                    logger.warning(f"Error processing log line: {e}")
+                    break
+
         except Exception as e:
             logger.warning(f"Error streaming logs: {e}")
+        finally:
+            # Signal the thread to stop and wait for it to finish
+            if reader_thread and reader_thread.is_alive():
+                stop_event.set()
+                # Close the log stream to unblock the thread
+                try:
+                    log_stream.close()
+                except:
+                    pass
+                # Wait for the thread to finish (with timeout)
+                reader_thread.join(timeout=1.0)
+                if reader_thread.is_alive():
+                    logger.warning(f"Log reader thread for container {container_id[:12]} did not stop gracefully")
 
     def _format_json_log(self, log_line: str) -> str:
         """Format a JSON log line."""
