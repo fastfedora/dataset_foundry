@@ -1,6 +1,8 @@
 import asyncio
 from datetime import datetime
 import logging
+import signal
+import sys
 from pathlib import Path
 
 from ..core.model import Model
@@ -123,6 +125,14 @@ async def main_cli():
     logger.info(f"Loaded pipeline: {args['pipeline']}")
 
     await display.run_pipeline(module.pipeline, params={ **args, **pipeline_parameters })
+
+# Set up signal handler for graceful interruption
+def signal_handler(_signum, _frame):
+    print("\n")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 def main():
     asyncio.run(main_cli())
