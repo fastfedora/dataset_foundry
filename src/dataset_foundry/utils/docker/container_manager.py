@@ -308,18 +308,22 @@ class ContainerManager:
             raise
         finally:
             if container:
-                if config.auto_remove:
-                    # Remove the container and its volumes
-                    container.remove(v=True)
-                else:
-                    # Handle orphaned containers: only if auto_remove=False & container still exists
-                    try:
-                        # Check if container still exists (hasn't been auto-removed)
-                        container.reload()
-                        logger.info(f"Container {container.id} completed successfully")
-                    except Exception:
-                        # Container was already removed or doesn't exist
-                        pass
+                try:
+                    if config.auto_remove:
+                        # Stop the container first if it's still running, then remove it
+                        self._cleanup_container(container)
+                    else:
+                        # Handle orphaned containers: only if auto_remove=False & container still exists
+                        try:
+                            # Check if container still exists (hasn't been auto-removed)
+                            container.reload()
+                            logger.info(f"Container {container.id} completed successfully")
+                        except Exception:
+                            # Container was already removed or doesn't exist
+                            pass
+                except Exception as e:
+                    # Log cleanup errors but don't raise them to avoid masking the original error
+                    logger.warning(f"Error during container cleanup: {e}")
 
     async def _wait_for_container(
         self,
@@ -482,8 +486,15 @@ class ContainerManager:
         except asyncio.TimeoutError:
             logger.warning(f"Container {container.id} timed out after {timeout} seconds")
             # Stop the container if it timed out
-            container.stop(timeout=10)
+            try:
+                container.stop(timeout=10)
+            except Exception as e:
+                logger.warning(f"Failed to stop timed out container {container.id}: {e}")
             return -1
+        except asyncio.CancelledError:
+            logger.debug(f"Container {container.id} wait was cancelled")
+            # Don't stop the container here - let the cleanup method handle it
+            raise
 
     async def _cleanup_log_task(self, log_task: asyncio.Task):
         """Clean up the log streaming task."""
@@ -492,3 +503,27 @@ class ContainerManager:
             await log_task
         except asyncio.CancelledError:
             pass
+
+    def _cleanup_container(self, container):
+        """Clean up a container by stopping it if running and then removing it."""
+        try:
+            # First, try to stop the container if it's still running
+            container.reload()
+            if container.status == 'running':
+                logger.debug(f"Stopping running container {container.id}")
+                container.stop(timeout=10)
+
+            # Then remove the container and its volumes
+            container.remove(v=True)
+            logger.debug(f"Successfully cleaned up container {container.id}")
+
+        except Exception as e:
+            # If we can't stop/remove the container gracefully, try force removal
+            try:
+                logger.warning(f"Failed to clean up container {container.id} gracefully: {e}")
+                logger.warning(f"Attempting force removal of container {container.id}")
+                container.remove(v=True, force=True)
+                logger.debug(f"Successfully force-removed container {container.id}")
+            except Exception as force_error:
+                logger.error(f"Failed to force-remove container {container.id}: {force_error}")
+                # Don't raise the exception - we don't want cleanup failures to mask the original error

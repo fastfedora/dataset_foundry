@@ -137,8 +137,9 @@ async def main_cli():
 
 # Set up signal handler for graceful interruption
 def signal_handler(_signum, _frame):
-    print("\n")
-    sys.exit(0)
+    print("\nReceived interrupt signal, shutting down gracefully...")
+    # Let the asyncio event loop handle the shutdown
+    # This allows running tasks to clean up properly
 
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)

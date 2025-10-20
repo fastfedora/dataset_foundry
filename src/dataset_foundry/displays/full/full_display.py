@@ -27,6 +27,7 @@ class FullDisplay(Display):
         )
 
         if app_task in done and not pipeline_task.done():
+            print("Shutting down Docker containers... Please wait for cleanup to complete.")
             pipeline_task.cancel()
             try:
                 await pipeline_task
