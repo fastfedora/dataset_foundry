@@ -36,7 +36,9 @@ class FullDisplay(Display):
 
         # If pipeline finished first, properly exit the app before cancelling the task
         if pipeline_task in done and not app_task.done():
-            app.exit()
+            if not params.get("no_exit", False):
+                app.exit()
+
             try:
                 await app_task
             except asyncio.CancelledError:

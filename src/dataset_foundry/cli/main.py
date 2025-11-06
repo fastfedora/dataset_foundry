@@ -100,6 +100,13 @@ async def main_cli():
         help="Type of display to use for logging output (default: full)"
     )
     parser.add_argument(
+        "--no-exit",
+        action="store_true",
+        env="DF_NO_EXIT",
+        default=False,
+        help="Don't exit the full display when pipeline finishes until Ctrl-Q is pressed (default: False)"
+    )
+    parser.add_argument(
         "--max-items",
         type=int,
         env="DF_MAX_ITEMS",
