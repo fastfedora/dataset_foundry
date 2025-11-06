@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import signal
-import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -70,6 +69,13 @@ async def main_cli():
         env="DF_NUM_SAMPLES",
         default=DEFAULT_NUM_SAMPLES,
         help=f"Number of samples to generate (default: {DEFAULT_NUM_SAMPLES})"
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        env="DF_LIMIT",
+        default=None,
+        help=f"The maximum number of samples to run through the pipeline (default: None)"
     )
     parser.add_argument(
         "--model",
