@@ -68,9 +68,14 @@ class ItemPipeline(Pipeline):
                 try:
                     await self.process_data_item(data_item, context)
                     pipeline_service.stop_item(info, status="success")
-                except Exception:
-                    pipeline_service.stop_item(info, status="error")
+                except anyio.get_cancelled_exc_class():
+                    # Re-raise cancellation to allow proper cleanup
+                    pipeline_service.stop_item(info, status="cancelled")
                     raise
+                except Exception as e:
+                    # Don't re-raise exceptions - allow other items to continue processing
+                    pipeline_service.stop_item(info, status="error")
+                    logger.error(f"Error processing item {data_item.id}: {e}", exc_info=True)
             finally:
                 limiter.release()
 
@@ -83,6 +88,9 @@ class ItemPipeline(Pipeline):
         for action in self._steps:
             try:
                 await action(item, context)
+            except anyio.get_cancelled_exc_class():
+                # Re-raise cancellation to propagate up the call stack
+                raise
             except Exception as e:
                 logger.error(
                     f"Error during item pipeline {self.name} in step {action.__name__}"
