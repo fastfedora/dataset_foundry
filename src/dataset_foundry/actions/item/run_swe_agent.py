@@ -59,6 +59,12 @@ def run_swe_agent(
                 **item.data
             })
 
+        if isinstance(resolved_prompt, str):
+            resolved_prompt = format_template(resolved_prompt, {
+                "id": item.id,
+                **item.data
+            })
+
         output_path = Path(resolved_output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
 
@@ -144,8 +150,5 @@ async def _prepare_agent_inputs(
         item_id=item.id,
         context_data={
             "attempt": 0,
-            "id": item.id,
-            **item.data,
-            # TODO: Think about adding `context` in here too. [fastfedora 18.Jul.25]
         }
     )

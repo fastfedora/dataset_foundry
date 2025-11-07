@@ -1,15 +1,17 @@
 import asyncio
-from datetime import datetime
 import logging
+import signal
+from datetime import datetime
 from pathlib import Path
 
 from ..core.model import Model
+from ..displays.get_display import get_display
 from ..utils.imports.import_module import import_module
 from ..utils.params.parse_dir_arg import parse_dir_arg
-
+from .advanced_argparse import AdvancedArgumentParser
 from .config import DATASET_DIR, LOG_DIR
 from .config import DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, DEFAULT_NUM_SAMPLES
-from .advanced_argparse import AdvancedArgumentParser
+from .config import DEFAULT_MAX_CONCURRENT_ITEMS
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +71,13 @@ async def main_cli():
         help=f"Number of samples to generate (default: {DEFAULT_NUM_SAMPLES})"
     )
     parser.add_argument(
+        "--limit",
+        type=int,
+        env="DF_LIMIT",
+        default=None,
+        help=f"The maximum number of samples to run through the pipeline (default: None)"
+    )
+    parser.add_argument(
         "--model",
         type=str,
         env="DF_MODEL",
@@ -83,6 +92,28 @@ async def main_cli():
         help=f"Temperature for generation (default: {DEFAULT_MODEL_TEMPERATURE})"
     )
     parser.add_argument(
+        "--display",
+        type=str,
+        env="DF_DISPLAY",
+        default="full",
+        choices=["full", "log", "none"],
+        help="Type of display to use for logging output (default: full)"
+    )
+    parser.add_argument(
+        "--no-exit",
+        action="store_true",
+        env="DF_NO_EXIT",
+        default=False,
+        help="Don't exit the full display when pipeline finishes until Ctrl-Q is pressed (default: False)"
+    )
+    parser.add_argument(
+        "--max-items",
+        type=int,
+        env="DF_MAX_ITEMS",
+        default=DEFAULT_MAX_CONCURRENT_ITEMS,
+        help=f"Maximum number of items to process concurrently"
+    )
+    parser.add_argument(
         "-P",
         action="append",
         type=lambda x: dict(item.split("=") for item in x.split(",") if "=" in item),
@@ -91,13 +122,10 @@ async def main_cli():
     )
 
     args = vars(parser.parse_args())
+    log_level = getattr(logging, args["log_level"].upper())
 
-    logging.basicConfig(
-        level=getattr(logging, args["log_level"].upper()),
-        # format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        format='%(levelname)s: %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
+    display = get_display(args["display"])
+    display.setup_logging(log_level=log_level)
 
     args["input_dir"] = parse_dir_arg(args["input_dir"], DATASET_DIR / args["dataset"], False)
     args["output_dir"] = parse_dir_arg(args["output_dir"], DATASET_DIR / args["dataset"], True)
@@ -108,15 +136,26 @@ async def main_cli():
         temperature=args["temperature"]
     )
 
-    pipeline_parameters = {}
+    pipeline_parameters = {
+        "max_concurrent_items": args["max_items"],
+    }
     parameter_list = args.pop("pipeline_parameters", []) or []
     for param_dict in parameter_list:
         pipeline_parameters.update(param_dict)
 
     module = import_module(args["pipeline"])
-
     logger.info(f"Loaded pipeline: {args['pipeline']}")
-    await module.pipeline.run(params={ **args, **pipeline_parameters })
+
+    await display.run_pipeline(module.pipeline, params={ **args, **pipeline_parameters })
+
+# Set up signal handler for graceful interruption
+def signal_handler(_signum, _frame):
+    print("\nReceived interrupt signal, shutting down gracefully...")
+    # Let the asyncio event loop handle the shutdown
+    # This allows running tasks to clean up properly
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 def main():
     asyncio.run(main_cli())

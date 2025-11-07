@@ -1,8 +1,10 @@
 import logging
+import anyio
 from pathlib import Path
 from typing import List, Optional
 
 from ..types.item_action import ItemAction
+from .pipeline_service import pipeline_service
 from .dataset import Dataset
 from .dataset_item import DatasetItem
 from .context import Context
@@ -23,7 +25,7 @@ class ItemPipeline(Pipeline):
             config: Optional[Path|str|dict] = {},
             metadata: Optional[dict] = {},
             setup: Optional[List[PipelineAction]] = None,
-            teardown: Optional[List[PipelineAction]] = None
+            teardown: Optional[List[PipelineAction]] = None,
         ):
         """
         Initialize the item pipeline.
@@ -54,14 +56,41 @@ class ItemPipeline(Pipeline):
             dataset (Dataset): The dataset to process.
             context (Context): The context to use for processing.
         """
-        logger.info(f"Processing {len(dataset.items)} dataset items")
-        for item in dataset.items:
-            await self.process_data_item(item, context)
+        max_concurrent_items = context.params.get("max_concurrent_items", 1)
+        limiter = anyio.CapacityLimiter(max_concurrent_items)
+
+        logger.info(f"Processing {len(dataset.items)} dataset items (concurrency: {max_concurrent_items})")
+
+        async def process_with_limit(data_item: DatasetItem):
+            await limiter.acquire()
+            try:
+                info = pipeline_service.start_item(data_item)
+                try:
+                    await self.process_data_item(data_item, context)
+                    pipeline_service.stop_item(info, status="success")
+                except anyio.get_cancelled_exc_class():
+                    # Re-raise cancellation to allow proper cleanup
+                    pipeline_service.stop_item(info, status="cancelled")
+                    raise
+                except Exception as e:
+                    # Don't re-raise exceptions - allow other items to continue processing
+                    pipeline_service.stop_item(info, status="error")
+                    logger.error(f"Error processing item {data_item.id}: {e}", exc_info=True)
+            finally:
+                limiter.release()
+
+        if dataset.items:
+            async with anyio.create_task_group() as tg:
+                for item in dataset.items:
+                    tg.start_soon(process_with_limit, item)
 
     async def process_data_item(self, item: Optional[DatasetItem], context: Optional[Context]):
         for action in self._steps:
             try:
                 await action(item, context)
+            except anyio.get_cancelled_exc_class():
+                # Re-raise cancellation to propagate up the call stack
+                raise
             except Exception as e:
                 logger.error(
                     f"Error during item pipeline {self.name} in step {action.__name__}"

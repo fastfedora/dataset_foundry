@@ -12,7 +12,7 @@ def set_item_property(
     ) -> ItemAction:
     async def set_item_property_action(item: DatasetItem, context: Context):
         resolved_key = resolve_item_value(key, item, context, required_as="key")
-        resolved_value = resolve_item_value(value, item, context, required_as="value")
+        resolved_value = resolve_item_value(value, item, context)
 
         item.push({
             resolved_key: resolved_value

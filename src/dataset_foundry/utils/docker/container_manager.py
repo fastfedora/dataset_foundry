@@ -4,6 +4,8 @@ Container manager for orchestrating Docker containers.
 
 import asyncio
 import logging
+import queue
+import threading
 import datason.json as json
 from datetime import datetime
 from pathlib import Path
@@ -306,18 +308,22 @@ class ContainerManager:
             raise
         finally:
             if container:
-                if config.auto_remove:
-                    # Remove the container and its volumes
-                    container.remove(v=True)
-                else:
-                    # Handle orphaned containers: only if auto_remove=False & container still exists
-                    try:
-                        # Check if container still exists (hasn't been auto-removed)
-                        container.reload()
-                        logger.info(f"Container {container.id} completed successfully")
-                    except Exception:
-                        # Container was already removed or doesn't exist
-                        pass
+                try:
+                    if config.auto_remove:
+                        # Stop the container first if it's still running, then remove it
+                        self._cleanup_container(container)
+                    else:
+                        # Handle orphaned containers: only if auto_remove=False & container still exists
+                        try:
+                            # Check if container still exists (hasn't been auto-removed)
+                            container.reload()
+                            logger.info(f"Container {container.id} completed successfully")
+                        except Exception:
+                            # Container was already removed or doesn't exist
+                            pass
+                except Exception as e:
+                    # Log cleanup errors but don't raise them to avoid masking the original error
+                    logger.warning(f"Error during container cleanup: {e}")
 
     async def _wait_for_container(
         self,
@@ -393,20 +399,73 @@ class ContainerManager:
         logs_format: Optional[str] = None
     ):
         """Stream logs from container in real-time."""
-        try:
-            for log_chunk in log_stream:
-                log_line = log_chunk.decode('utf-8', errors='ignore').strip()
-                logs_buffer.append(log_line)
-                if stream_logs:
-                    if logs_format == "json":
-                        try:
-                            log_line = self._format_json_log(log_line)
-                        except:
-                            pass
+        # Create a queue for thread-safe communication, which is required to run SWE agents when
+        # using the full display.
+        log_queue = queue.Queue()
+        stop_event = threading.Event()
+        reader_thread = None
 
-                    logger.info(f"[Container {container_id[:12]}] {log_line}")
+        def _read_log_stream():
+            """Read the blocking log stream in a thread and put lines in queue."""
+            try:
+                for log_chunk in log_stream:
+                    if stop_event.is_set():
+                        break
+                    log_line = log_chunk.decode('utf-8', errors='ignore').strip()
+                    log_queue.put(log_line)
+                # Signal end of stream
+                log_queue.put(None)
+            except Exception as e:
+                logger.warning(f"Error reading log stream: {e}")
+                log_queue.put(None)
+
+        try:
+            # Start the blocking reader in a thread
+            reader_thread = threading.Thread(target=_read_log_stream, daemon=True)
+            reader_thread.start()
+
+            # Process logs as they arrive
+            while True:
+                try:
+                    # Wait for a log line with a short timeout
+                    log_line = await asyncio.to_thread(log_queue.get, timeout=0.1)
+
+                    if log_line is None:
+                        # End of stream
+                        break
+
+                    logs_buffer.append(log_line)
+                    if stream_logs:
+                        if logs_format == "json":
+                            try:
+                                log_line = self._format_json_log(log_line)
+                            except:
+                                pass
+
+                        logger.info(f"[Container {container_id[:12]}] {log_line}")
+
+                except queue.Empty:
+                    # No log line available yet, continue waiting
+                    continue
+                except Exception as e:
+                    logger.warning(f"Error processing log line: {e}")
+                    break
+
         except Exception as e:
             logger.warning(f"Error streaming logs: {e}")
+        finally:
+            # Signal the thread to stop and wait for it to finish
+            if reader_thread and reader_thread.is_alive():
+                stop_event.set()
+                # Close the log stream to unblock the thread
+                try:
+                    log_stream.close()
+                except:
+                    pass
+                # Wait for the thread to finish (with timeout)
+                reader_thread.join(timeout=1.0)
+                if reader_thread.is_alive():
+                    logger.warning(f"Log reader thread for container {container_id[:12]} did not stop gracefully")
 
     def _format_json_log(self, log_line: str) -> str:
         """Format a JSON log line."""
@@ -427,8 +486,15 @@ class ContainerManager:
         except asyncio.TimeoutError:
             logger.warning(f"Container {container.id} timed out after {timeout} seconds")
             # Stop the container if it timed out
-            container.stop(timeout=10)
+            try:
+                container.stop(timeout=10)
+            except Exception as e:
+                logger.warning(f"Failed to stop timed out container {container.id}: {e}")
             return -1
+        except asyncio.CancelledError:
+            logger.debug(f"Container {container.id} wait was cancelled")
+            # Don't stop the container here - let the cleanup method handle it
+            raise
 
     async def _cleanup_log_task(self, log_task: asyncio.Task):
         """Clean up the log streaming task."""
@@ -437,3 +503,27 @@ class ContainerManager:
             await log_task
         except asyncio.CancelledError:
             pass
+
+    def _cleanup_container(self, container):
+        """Clean up a container by stopping it if running and then removing it."""
+        try:
+            # First, try to stop the container if it's still running
+            container.reload()
+            if container.status == 'running':
+                logger.debug(f"Stopping running container {container.id}")
+                container.stop(timeout=10)
+
+            # Then remove the container and its volumes
+            container.remove(v=True)
+            logger.debug(f"Successfully cleaned up container {container.id}")
+
+        except Exception as e:
+            # If we can't stop/remove the container gracefully, try force removal
+            try:
+                logger.warning(f"Failed to clean up container {container.id} gracefully: {e}")
+                logger.warning(f"Attempting force removal of container {container.id}")
+                container.remove(v=True, force=True)
+                logger.debug(f"Successfully force-removed container {container.id}")
+            except Exception as force_error:
+                logger.error(f"Failed to force-remove container {container.id}: {force_error}")
+                # Don't raise the exception - we don't want cleanup failures to mask the original error

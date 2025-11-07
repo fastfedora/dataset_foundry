@@ -45,11 +45,11 @@ from dataset_foundry.actions.item.run_swe_agent import run_swe_agent
 
 # In a pipeline
 run_swe_agent(
-    instructions=Key("context.agents.instructions"),
+    instructions=Key("context.swe_agent.instructions"),
     prompt=Key("context.prompts.implement_spec"),
     spec=Key("spec"),
-    output_dir=Template("{context.output_dir}/{id}"),
-    agent=Key("context.agents.agent"),
+    output_dir=Key("context.output_dir"),
+    agent=Key("context.swe_agent.type"),
 )
 ```
 
@@ -83,6 +83,7 @@ run_swe_agent(
     timeout=7200,
     max_retries=5,
     output_key="custom_result",
+    stream_logs=True,
 )
 ```
 
@@ -93,9 +94,17 @@ run_swe_agent(
 #### Codex Agent (`codex`)
 - **Purpose**: OpenAI's Codex for code generation
 - **Image**: `codex-agent:latest`
-- **Entrypoint**: `bash -c "cat /workspace/PROMPT.md | codex exec --skip-git-repo-check"`
+- **Entrypoint**: `["bash", "-c", "cat input/prompt.md | codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check"]`
 - **Capabilities**: AI-powered code generation using OpenAI's Codex
 - **Requirements**: `OPENAI_API_KEY` environment variable
+
+#### Claude Code Agent (`claude_code`)
+- **Purpose**: Anthropic's Claude for code generation
+- **Image**: `claude-code-agent:latest`
+- **Command**: `["cat input/prompt.md | claude --verbose -p --output-format stream-json --dangerously-skip-permissions"]`
+- **Capabilities**: AI-powered code generation using Anthropic's Claude
+- **Requirements**: `ANTHROPIC_API_KEY` environment variable
+- **Special Features**: JSON log formatting, network capabilities
 
 ### Custom Agent Configuration
 
@@ -113,33 +122,29 @@ configs/agents/my_custom_agent/
     └── main.py        # Custom agent entry point, if not installed by Dockerfile
 ```
 
-The `agent.yml` file should contain:
+The `agent.yml` file should contain at a minimum:
 
 ```yaml
-image: "my-custom-agent:latest"
-dockerfile_path: "src/dataset_foundry/configs/agents/my_custom_agent"
-working_dir: "/workspace"
-environment:
-  PYTHONPATH: "/workspace"
-  LANG: "en_US.UTF-8"
-volumes:
-  "/tmp": {"bind": "/tmp", "mode": "rw"}
-entrypoint: ["python", "-m", "agent.main"]
-
-# Or for a CLI tool that reads from stdin
-image: "my-cli-agent:latest"
-dockerfile_path: "src/dataset_foundry/configs/agents/my_cli_agent"
-working_dir: "/workspace"
-environment:
-  API_KEY: "${API_KEY}"
-volumes:
-  "/tmp": {"bind": "/tmp", "mode": "rw"}
-entrypoint: ["bash", "-c", "cat /workspace/PROMPT.md | my-cli-tool --config /workspace/spec.yaml"]
+container:
+  image: "my-custom-agent:latest"
+  # `input/prompt.md` contains the prompt for the agent to execute
+  entrypoint: ["python", "-m", "agent.main", "input/prompt.md"]
+  # Optional: specify working directory
+  working_dir: "/workspace"
+  # Optional: environment variables
+  environment:
+    CUSTOM_VAR: "value"
+  # Optional: capabilities
+  cap_add:
+    - NET_ADMIN
 ```
 
 The agent runner will automatically load the configuration from this path. All agent behavior,
 including command structure, environment variables, and execution patterns, is defined in the
 `agent.yml` file.
+
+The working directory must be configured either in the Dockerfile via `WORKDIR` or via the
+`container.working_dir` key in `agent.yml`.
 
 ### Environment Variables
 
@@ -147,12 +152,11 @@ Some agents require environment variables to function properly. The agent runner
 environment variable substitution:
 
 ```yaml
-environment:
-  OPENAI_API_KEY: "${OPENAI_API_KEY}"  # Will be replaced with system environment variable
-  CUSTOM_VAR: "static_value"           # Will be used as-is
+container:
+  environment:
+    OPENAI_API_KEY: "${OPENAI_API_KEY}"  # Will be replaced with system environment variable
+    CUSTOM_VAR: "static_value"           # Will be used as-is
 ```
-
-The system will automatically inject environment variables from the host system into the container.
 
 ### Agent Directory Structure
 
@@ -169,23 +173,21 @@ configs/agents/
 
 The action creates these files in the agent's workspace:
 
-- **AGENTS.md**: General operating instructions
-- **PROMPT.md**: Task-specific prompt
-- **spec.yaml**: Specification data (JSON/YAML)
+- **input/AGENTS.md**: General operating instructions
+- **input/prompt.md**: Task-specific prompt (created by the action)
+- **input/spec.yaml**: Specification data (JSON/YAML)
 - **repo/**: Optional existing repository
 
 ### Typical Output Structure
 
 ```
 output_dir/
-├── AGENTS.md
-├── PROMPT.md
-├── spec.yaml
-├── repo/
-│   └── (generated repo files)
-└── build-info
-    ├── agent_metadata.yaml
-    └── agent_results.yaml
+├── input/
+│   ├── AGENTS.md
+│   ├── prompt.md
+│   └── spec.yaml
+└── repo/
+    └── (generated repo files)
 ```
 
 ### Result Data
@@ -195,11 +197,29 @@ The action stores results in item data:
 ```python
 {
     "agent_result": AgentResult,
-    "agent_result_metadata": {
-        "agent": "codex",
-        "output_dir": "/path/to/output",
-        "attempts": 1,
-        "success": True
-    }
 }
 ```
+
+## Parameters
+
+### Required Parameters
+- **instructions**: General operating instructions for the agent (rendered as AGENTS.md)
+- **prompt**: The specific prompt that references the spec
+- **spec**: Specification data (string or dict, rendered as JSON/YAML)
+- **output_dir**: Directory where agent output should be saved
+- **agent**: Name of the agent to run (e.g., "codex", "claude_code")
+
+### Optional Parameters
+- **repo_path**: Optional path to pre-existing repository
+- **timeout**: Maximum execution time in seconds (default: 3600)
+- **max_retries**: Maximum number of retry attempts (default: 3)
+- **output_key**: Key to store the agent result in item data (default: "agent_result")
+- **stream_logs**: Whether to stream container logs to logger.info (default: False)
+
+### Default Parameter Resolution
+The action uses dataset_foundry's parameter resolution system with these defaults:
+- `instructions`: `Key("context.swe_agent.instructions")`
+- `prompt`: `Key("context.prompts.implement_spec")`
+- `spec`: `Key("spec")`
+- `output_dir`: `Key("context.output_dir")`
+- `agent`: `Key("context.swe_agent.type")`
