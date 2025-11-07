@@ -11,6 +11,7 @@ dependencies = [
     "anyio>=4.8.0",
     "datason>=0.13.0",
     "docker>=7.1.0",
+    "gitmatch>=0.2.1",
     "langchain==0.3.21",
     "langchain-anthropic==0.3.10",
     "langchain-core==0.3.45",

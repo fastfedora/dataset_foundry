@@ -141,6 +141,7 @@ dependencies = [
     { name = "anyio" },
     { name = "datason" },
     { name = "docker" },
+    { name = "gitmatch" },
     { name = "langchain" },
     { name = "langchain-anthropic" },
     { name = "langchain-core" },
@@ -159,6 +160,7 @@ requires-dist = [
     { name = "anyio", specifier = ">=4.8.0" },
     { name = "datason", specifier = ">=0.13.0" },
     { name = "docker", specifier = ">=7.1.0" },
+    { name = "gitmatch", specifier = ">=0.2.1" },
     { name = "langchain", specifier = "==0.3.21" },
     { name = "langchain-anthropic", specifier = "==0.3.10" },
     { name = "langchain-core", specifier = "==0.3.45" },
@@ -202,6 +204,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/91/9b/4a2ea29aeba62471211598dac5d96825bb49348fa07e906ea930394a83ce/docker-7.1.0.tar.gz", hash = "sha256:ad8c70e6e3f8926cb8a92619b832b4ea5299e2831c14284663184e200546fa6c", size = 117834 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e3/26/57c6fb270950d476074c087527a558ccb6f4436657314bfb6cdf484114c4/docker-7.1.0-py3-none-any.whl", hash = "sha256:c96b93b7f0a746f9e77d325bcfb87422a3d8bd4f03136ae8a85b37f1898d5fc0", size = 147774 },
+]
+
+[[package]]
+name = "gitmatch"
+version = "0.2.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fe/67/c57587329ad2c0be4ff6361e84989f4b9afb283c5d8fb18a9380ed39c9a0/gitmatch-0.2.1.tar.gz", hash = "sha256:46d2c5e25d579580ebed15632ceaaae696fa437f8b52634fb042d1b4fa432f52", size = 16379 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6d/5c/18e5a3d3fed736692c7f33be646cd6ec3d1ae3214eb19b7ddc745c252641/gitmatch-0.2.1-py3-none-any.whl", hash = "sha256:c74b370d78356e587c87374ded757ce953c5dd84b458ddea7e65918d7cd11972", size = 8127 },
 ]
 
 [[package]]
