@@ -37,8 +37,8 @@ RUN chown -R guest:guest /workspace
 
 USER guest
 
-# Install dependencies, if needed
-ENTRYPOINT ["sh", "-c", "/usr/local/bin/init.sh && bash -c \"$*\"", "--"]
+# Run init script, then execute the command passed to the container
+ENTRYPOINT ["sh", "-c", "/usr/local/bin/init.sh && exec \"$@\"", "--"]
 
 # Default command (can be overridden)
 CMD ["python"]

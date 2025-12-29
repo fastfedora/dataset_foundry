@@ -84,5 +84,5 @@ RUN chmod +x /usr/local/bin/firewall/init.sh && \
 
 USER node
 
-# Initialize firewall and then run the command (inserted as `$*`)
-ENTRYPOINT ["sh", "-c", "sudo /usr/local/bin/firewall/init.sh && bash -c \"$*\"", "--"]
+# Initialize firewall and then execute the command passed to the container
+ENTRYPOINT ["sh", "-c", "sudo /usr/local/bin/firewall/init.sh && exec \"$@\"", "--"]

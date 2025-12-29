@@ -279,7 +279,9 @@ class ContainerManager:
 
             container = self._docker_client.containers.run(
                 image=config.image,
-                command=["timeout", f"{timeout}s"] + config.command,
+                # Wrap the entire command in 'bash -c' so timeout applies to the full command chain,
+                # including any && or || sequences.
+                command=["timeout", f"{timeout}s", "bash", "-c", " ".join(config.command)],
                 entrypoint=config.entrypoint,
                 user=config.user,
                 environment=config.environment,
