@@ -61,11 +61,12 @@ class ItemPipeline(Pipeline):
 
         logger.info(f"Processing {len(dataset.items)} dataset items (concurrency: {max_concurrent_items})")
 
-        async def process_with_limit(data_item: DatasetItem):
+        async def process_with_limit(data_item: DatasetItem, item_index: int):
             await limiter.acquire()
             try:
                 info = pipeline_service.start_item(data_item)
                 try:
+                    data_item.push({ "index": item_index }, "item_pipeline")
                     await self.process_data_item(data_item, context)
                     pipeline_service.stop_item(info, status="success")
                 except anyio.get_cancelled_exc_class():
@@ -81,8 +82,8 @@ class ItemPipeline(Pipeline):
 
         if dataset.items:
             async with anyio.create_task_group() as tg:
-                for item in dataset.items:
-                    tg.start_soon(process_with_limit, item)
+                for item_index, item in enumerate(dataset.items):
+                    tg.start_soon(process_with_limit, item, item_index)
 
     async def process_data_item(self, item: Optional[DatasetItem], context: Optional[Context]):
         for action in self._steps:
