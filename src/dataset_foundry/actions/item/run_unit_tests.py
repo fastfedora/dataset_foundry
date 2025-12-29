@@ -1,3 +1,4 @@
+import logging
 from typing import Callable, Union, Optional, List
 from pathlib import Path
 
@@ -10,6 +11,8 @@ from ...utils.unit_tests.run_python_unit_tests import run_python_unit_tests
 from ...utils.unit_tests.parse_python_unit_test_results import parse_python_unit_test_results
 from ...utils.docker.sandbox_runner import SandboxRunner
 
+logger = logging.getLogger(__name__)
+
 def run_unit_tests(
         filename: Union[Callable,Key,str],
         dir: Union[Callable,Key,str] = Key("context.input_dir"),
@@ -17,6 +20,7 @@ def run_unit_tests(
         sandbox: Optional[Union[Callable,Key,str]] = None,
         stream_logs: Union[Callable,Key,bool] = False,
         timeout: Union[Callable,Key,int] = 300,
+        setup_repo: Optional[Union[Callable,Key,bool]] = False,
     ) -> ItemAction:
     async def run_unit_tests_action(item: DatasetItem, context: Context):
         resolved_filename = resolve_item_value(filename, item, context, required_as="filename")
@@ -25,15 +29,22 @@ def run_unit_tests(
         resolved_sandbox = resolve_item_value(sandbox, item, context)
         resolved_stream_logs = resolve_item_value(stream_logs, item, context)
         resolved_timeout = resolve_item_value(timeout, item, context)
+        resolved_setup_repo = resolve_item_value(setup_repo, item, context)
 
         if resolved_sandbox:
-            # Run tests in sandbox
             if isinstance(resolved_sandbox, str):
                 sandbox_manager = SandboxRunner(resolved_sandbox)
             else:
                 raise ValueError("Sandbox must be a string name of a sandbox")
 
-            command = ["python", "-m", "pytest", "-v", resolved_filename]
+            command = [f"python -m pytest -v '{resolved_filename}'"]
+            if resolved_setup_repo:
+                setup_command = _get_setup_repo_command(resolved_dir)
+                if setup_command:
+                    command.insert(0, "&&")
+                    command.insert(0, setup_command)
+
+            logger.info(f"Running tests in sandbox with command: {' '.join(command)}")
             sandbox_result = await sandbox_manager.run(
                 target_file=resolved_filename,
                 workspace_dir=resolved_dir,
@@ -51,3 +62,19 @@ def run_unit_tests(
         item.push({ resolved_property: result }, run_unit_tests)
 
     return run_unit_tests_action
+
+
+def _get_setup_repo_command(dir: Path) -> str:
+    if _file_exists(dir, "script/setup"):
+        return "chmod u+x script/* && script/setup"
+    elif _file_exists(dir, "requirements.txt"):
+        return "pip install -r requirements.txt"
+    elif _file_exists(dir, "pyproject.toml"):
+        return "pip install -e ."
+    else:
+        return ""
+
+
+def _file_exists(dir: Path, path: str) -> bool:
+    file_path = Path(dir) / path
+    return file_path.exists()
