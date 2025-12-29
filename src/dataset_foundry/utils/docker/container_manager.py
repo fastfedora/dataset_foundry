@@ -25,6 +25,9 @@ EXIT_CODE_SIGKILL = 137
 # Buffer time in seconds to add to the container timeout to allow the `timeout` command to execute
 TIMEOUT_BUFFER = 10
 
+# Time to wait for log streams to drain after container exits (seconds)
+LOG_DRAIN_TIMEOUT = 60
+
 class BuildConfig(BaseModel):
     """Configuration for building a Docker image."""
 
@@ -358,6 +361,33 @@ class ContainerManager:
             )
 
             exit_code = await self._wait_for_container_completion(container, timeout)
+
+            # Wait for log streams to drain after container exits. The log streams with follow=True
+            # will automatically tell the asyncio tasks to finish when the container exits and all
+            # output is flushed. We need to wait for this before grabbing buffer contents, otherwise
+            # we may miss output that's still in Docker's buffers.
+            log_tasks = [task for task in [logs_task, stdout_task, stderr_task] if task]
+            if log_tasks:
+                logger.debug(f"Waiting for log streams to drain for container {container.id}")
+                done, pending = await asyncio.wait(
+                    log_tasks,
+                    timeout=LOG_DRAIN_TIMEOUT,
+                    return_when=asyncio.ALL_COMPLETED
+                )
+                if pending:
+                    logger.warning(
+                        f"Log streams did not drain within {LOG_DRAIN_TIMEOUT}s for container "
+                        f"{container.id}, {len(pending)} tasks still pending"
+                    )
+                    for task in pending:
+                        task.cancel()
+                    # Wait for cancellation to complete
+                    await asyncio.gather(*pending, return_exceptions=True)
+
+            # Mark tasks as handled so finally block doesn't try to clean them up again
+            logs_task = None
+            stdout_task = None
+            stderr_task = None
 
             # Detect if timeout occurred
             if exit_code == EXIT_CODE_TIMEOUT or exit_code == EXIT_CODE_SIGKILL:
