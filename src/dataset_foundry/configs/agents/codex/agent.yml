@@ -2,4 +2,6 @@ container:
   image: "codex-agent:latest"
   environment:
     OPENAI_API_KEY: "${OPENAI_API_KEY}"
-  command: ["printenv OPENAI_API_KEY | codex login --with-api-key && cat input/prompt.md | codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check"]
+    # Set in `agent_runner` to be model string from `CODEX_MODEL` or `DF_MODEL`
+    CODEX_MODEL: "${AGENT_MODEL}"
+  command: ["printenv OPENAI_API_KEY | codex login --with-api-key && cat input/prompt.md | codex exec --model \"$CODEX_MODEL\" --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check"]

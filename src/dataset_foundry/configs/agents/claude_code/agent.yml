@@ -8,6 +8,8 @@ container:
     - NET_RAW
   environment:
     ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+    # Set in `agent_runner` to be model string from `CLAUDE_CODE_MODEL` or `DF_MODEL`
+    ANTHROPIC_MODEL: "${AGENT_MODEL}"
     NODE_OPTIONS: "--max-old-space-size=4096"
     CLAUDE_CONFIG_DIR: "/home/node/.claude"
   command: ["cat input/prompt.md | claude --verbose -p --output-format stream-json --dangerously-skip-permissions"]

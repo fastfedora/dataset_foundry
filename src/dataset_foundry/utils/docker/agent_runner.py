@@ -4,6 +4,7 @@ Agent runner for executing different types of agents in containers.
 
 import datason.json as json
 import logging
+import os
 from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Any, Optional, List
@@ -123,6 +124,14 @@ class AgentRunner(BaseRunner):
         # Write prompt to a file to avoid issues when the prompt is too long
         prompt_file = output_dir / "input" / "prompt.md"
         prompt_file.write_text(inputs.prompt)
+
+        # Parse the agent model from the environment variable
+        agent_model = os.getenv(self.runner_name.upper() + "_MODEL") or os.getenv("DF_MODEL")
+        if "/" in agent_model:
+            # Ignore Inspect-style providers, since we're not proxying through Inspect
+            provider, model = agent_model.split("/")
+            agent_model = model
+        os.environ["AGENT_MODEL"] = agent_model
 
         self._prepare_volumes_config(config, [
             Mount(target=working_dir, source=str(output_dir), type="bind", read_only=False),
