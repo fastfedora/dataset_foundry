@@ -2,6 +2,8 @@ import datason.json as json
 from pathlib import Path
 import yaml
 
+from mergedeep import merge
+
 class Config(dict):
     """
     A object to store configuration values.
@@ -13,21 +15,56 @@ class Config(dict):
     string, it will be formatted as a YAML string before being substituted.
 
     To reference a nested key, use the dot notation.
+
+    Supports an `include` key that contains a list of additional config files to load and merge.
+    Include paths are resolved relative to the config file containing the include. The main config
+    file's values take precedence over included files, and later includes override earlier ones.
     """
-    def __init__(self, pathOrValues: Path|str|dict):
+    def __init__(self, path_or_values: Path | str | dict):
         super().__init__()
 
-        if not isinstance(pathOrValues, dict):
-            with open(pathOrValues) as file:
-                if pathOrValues.suffix == ".json":
-                    values = json.load(file)
-                else:
-                    values = yaml.safe_load(file)
+        if isinstance(path_or_values, dict):
+            values = path_or_values
         else:
-            values = pathOrValues
+            config_path = Path(path_or_values)
+            values = self._load_file(config_path)
 
         self.update(values)
         self._resolve_anchors(values)
+
+    def _load_file(self, path: Path) -> dict:
+        """
+        Load a JSON or YAML file and return its contents as a dict. If the file contains an
+        `include` key, process the includes relative to the file's directory.
+        """
+        with open(path) as file:
+            if path.suffix == ".json":
+                values = json.load(file)
+            else:
+                values = yaml.safe_load(file)
+
+        if "include" in values:
+            values = self._process_includes(values, path.parent)
+
+        return values
+
+    def _process_includes(self, values: dict, base_directory: Path) -> dict:
+        """
+        Process the include key, loading and merging additional config files.
+        Include paths are resolved relative to the base_directory.
+        """
+        include_paths = values.pop("include")
+        result = {}
+
+        for include_path in include_paths:
+            included_values = self._load_file(base_directory / include_path)
+            # Merge included values into result (later includes override earlier ones)
+            merge(result, included_values)
+
+        # Merge main config values last (main config takes precedence)
+        merge(result, values)
+        return result
+
 
     def _resolve_anchors(self, data):
         """
