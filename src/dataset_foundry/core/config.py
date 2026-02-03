@@ -30,7 +30,7 @@ class Config(dict):
             values = self._load_file(config_path)
 
         self.update(values)
-        self._resolve_anchors(values)
+        self._resolve_anchors_fully(values)
 
     def _load_file(self, path: Path) -> dict:
         """
@@ -65,36 +65,54 @@ class Config(dict):
         merge(result, values)
         return result
 
+    def _resolve_anchors_fully(self, data, max_passes: int = 100):
+        """
+        Resolves all anchor references in the configuration data, regardless of order. Runs multiple
+        passes until no further substitutions are possible (or max_passes to guard against circular
+        references).
+        """
+        for _ in range(max_passes):
+            if not self._resolve_anchors(data):
+                break
 
-    def _resolve_anchors(self, data):
+    def _resolve_anchors(self, data) -> bool:
         """
-        Recursively resolves anchor references in the configuration data.
-        Anchor references are in the format {#key.subkey} and will be replaced
-        with the corresponding value from the configuration.
+        One pass: recursively resolves anchor references in the configuration data. Returns True if
+        any string was changed.
         """
+        changed = False
         if isinstance(data, dict):
             for key, value in list(data.items()):
                 if isinstance(value, str):
-                    data[key] = self._replace_anchors_in_string(value)
+                    resolved = self._replace_anchors_in_string(value)
+                    if resolved != value:
+                        data[key] = resolved
+                        changed = True
                 else:
-                    self._resolve_anchors(value)
+                    changed = self._resolve_anchors(value) or changed
         elif isinstance(data, list):
             for index, item in enumerate(data):
                 if isinstance(item, str):
-                    data[index] = self._replace_anchors_in_string(item)
+                    resolved = self._replace_anchors_in_string(item)
+                    if resolved != item:
+                        data[index] = resolved
+                        changed = True
                 else:
-                    self._resolve_anchors(item)
+                    changed = self._resolve_anchors(item) or changed
+        return changed
 
-    def _replace_anchors_in_string(self, value):
+    def _replace_anchors_in_string(self, value: str) -> str:
         """
-        Replaces anchor references in a string with their corresponding values.
+        Replaces anchor references in a string with their corresponding values
+        from the config. Substituted values are used as-is (may contain further
+        anchors to be resolved in a later pass).
         """
         import re
         pattern = re.compile(r'\{#(.*?)\}')
         matches = pattern.findall(value)
 
         for match in matches:
-            anchor_value = self._get_nested_value(match, self)
+            anchor_value = self._get_nested_value(match.strip(), self)
             if anchor_value is not None:
                 if not isinstance(anchor_value, str):
                     anchor_value = yaml.dump(anchor_value).strip()
