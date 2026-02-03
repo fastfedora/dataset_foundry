@@ -14,4 +14,4 @@ ENV LANG=en_US.UTF-8
 ENV PYTHONUNBUFFERED=1
 
 # Default command (will be overridden by entrypoint)
-CMD ["bash"]
+ENTRYPOINT ["sh", "-c", "exec \"$@\"", "--"]
