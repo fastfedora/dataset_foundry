@@ -1,30 +1,46 @@
 [project]
 name = "dataset-foundry"
-description = "Build and refine datasets using LLMs"
+description = "Build, refine and validate AI safety datasets using LLM pipelines"
 readme = "README.md"
 authors = [
   {name = "Trevor Lohrbeer", email = "trevor@fastfedora.com"},
 ]
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dynamic = ["version"]
 dependencies = [
-    "anyio>=4.8.0",
-    "datason>=0.13.0",
-    "docker>=7.1.0",
-    "gitmatch>=0.2.1",
-    "langchain==0.3.21",
-    "langchain-anthropic==0.3.10",
-    "langchain-core==0.3.45",
-    "langchain-openai==0.3.9",
-    "mergedeep>=1.3.4",
-    "pydantic>=2.10.6",
-    "pytest>=8.3.4",
-    "pytest-asyncio>=1.0.0",
-    "python-dotenv==1.0.1",
-    "PyYAML==6.0.2",
-    "textual>=6.2.0",
-    "toolz>=1.0.0",
+  "anyio>=4.8.0",
+  "datason>=0.13.0",
+  "docker>=7.1.0",
+  "gitmatch>=0.2.1",
+  "langchain==0.3.21",
+  "langchain-anthropic==0.3.10",
+  "langchain-core==0.3.45",
+  "langchain-openai==0.3.9",
+  "mergedeep>=1.3.4",
+  "pydantic>=2.10.6",
+  "pytest>=8.3.4",
+  "pytest-asyncio>=1.0.0",
+  "python-dotenv==1.0.1",
+  "PyYAML==6.0.2",
+  "textual>=6.2.0",
+  "toolz>=1.0.0",
 ]
+classifiers = [
+  "Environment :: Console",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Typing :: Typed",
+  "Operating System :: OS Independent",
+]
+
+[project.urls]
+GitHub = "https://github.com/fastfedora/dataset-foundry"
 
 [project.scripts]
 dataset-foundry = "dataset_foundry.cli.main:main"
