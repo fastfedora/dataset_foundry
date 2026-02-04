@@ -1,5 +1,4 @@
 [project]
-version = "0.1.0"
 name = "dataset-foundry"
 description = "Build and refine datasets using LLMs"
 readme = "README.md"
@@ -7,6 +6,7 @@ authors = [
   {name = "Trevor Lohrbeer", email = "trevor@fastfedora.com"},
 ]
 requires-python = ">=3.12"
+dynamic = ["version"]
 dependencies = [
     "anyio>=4.8.0",
     "datason>=0.13.0",
@@ -33,8 +33,11 @@ dataset-foundry = "dataset_foundry.cli.main:main"
 dist = ["twine", "build"]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/dataset_foundry"]
+
+[tool.hatch.version]
+source = "vcs"
