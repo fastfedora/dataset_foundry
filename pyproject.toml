@@ -29,6 +29,9 @@ dependencies = [
 [project.scripts]
 dataset-foundry = "dataset_foundry.cli.main:main"
 
+[project.optional-dependencies]
+dist = ["twine", "build"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
